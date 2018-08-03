@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Stores files needed during a test. IAM profiles provision slowly, so reusing them can be desirable.
+Resources:
+  StorageRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            Service:
+              - ec2.amazonaws.com
+              - s3.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: LaaS-write-streams
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action: sts:AssumeRole
+                Resource: arn:aws:iam::915926889391:role/pipeline-prod-log-producer-545459181881
+              -
+                Effect: Allow
+                Action: sts:AssumeRole
+                Resource: arn:aws:iam::684014341329:role/laas-prod-stream-writer
+  AccessProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - Ref: StorageRole
+  JiraBucket:
+    Type: AWS::S3::Bucket
+  VirtualUsersBucket:
+    Type: AWS::S3::Bucket
+  ResultsBucket:
+    Type: AWS::S3::Bucket
