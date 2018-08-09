@@ -13,7 +13,7 @@ dependencies {
     compile("junit:junit:4.12")
     compile("org.hamcrest:hamcrest-library:1.3")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
-    compile("net.jcip:jcip-annotations:1.0")
+    compile("com.github.stephenc.jcip:jcip-annotations:1.0-1")
     compile("commons-codec:commons-codec:1.10")
     aws(
         "ec2",
