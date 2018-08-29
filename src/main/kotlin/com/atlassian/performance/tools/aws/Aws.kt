@@ -9,14 +9,12 @@ import com.amazonaws.retry.RetryPolicy
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder
 import com.amazonaws.services.cloudformation.model.Stack
-import com.amazonaws.services.cloudformation.model.StackStatus
-import com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE
-import com.amazonaws.services.cloudformation.model.StackStatus.DELETE_IN_PROGRESS
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
-import com.amazonaws.services.ec2.model.*
-import com.amazonaws.services.ec2.model.InstanceStateName.ShuttingDown
-import com.amazonaws.services.ec2.model.InstanceStateName.Terminated
+import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.ec2.model.AvailabilityZoneState
+import com.amazonaws.services.ec2.model.DescribeImagesRequest
+import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClientBuilder
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
@@ -151,28 +149,12 @@ class Aws(
     ) = customDatasetStorage.findStorage("DatasetBucket", datasetName)
 
     fun cleanLeftovers() {
-        val cleanStackStatuses = listOf(
-            DELETE_COMPLETE,
-            DELETE_IN_PROGRESS
-        )
-        val cleanInstanceStatuses = listOf(
-            ShuttingDown,
-            Terminated
-        )
-        val stacks = mutableListOf<Resource>()
-        scrollingCloudformation.scrollThroughStacks { stackBatch ->
-            stackBatch
-                .filter { StackStatus.fromValue(it.stackStatus) !in cleanStackStatuses }
-                .forEach { stacks += ProvisionedStack(it, this) }
-        }
+        val stacks = Cloudformation(this, cloudformation).listExpiredStacks()
         waitUntilReleased(stacks)
-        val instances = mutableListOf<Resource>()
-        scrollingEc2.scrollThroughInstances { instanceBatch ->
-            instanceBatch
-                .filter { InstanceStateName.fromValue(it.state.name) !in cleanInstanceStatuses }
-                .forEach { instances += Ec2Instance(it, terminationBatchingEc2) }
-        }
+
+        val instances = Ec2(ec2).listExpiredInstances()
         waitUntilReleased(instances, timeout = Duration.ofMinutes(2))
+
         val keys = ec2.describeKeyPairs().keyPairs.map { key ->
             RemoteSshKey(SshKeyName(key.keyName), ec2)
         }
@@ -208,10 +190,6 @@ class Aws(
     }
 
     fun listDisposableStacks(): List<Stack> {
-        val stacks = mutableListOf<Stack>()
-        scrollingCloudformation.scrollThroughStacks { batch ->
-            stacks.addAll(batch.filter { it.tags.map { it.key }.contains(Investment.disposableKey) })
-        }
-        return stacks
+        return Cloudformation(this, cloudformation).listDisposableStacks()
     }
 }
