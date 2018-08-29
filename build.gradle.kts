@@ -9,9 +9,6 @@ dependencies {
     compile("com.atlassian.performance.tools:concurrency:0.0.1")
     compile("com.atlassian.performance.tools:io:0.0.1")
     compile("com.atlassian.performance.tools:ssh:0.1.0")
-
-    compile("junit:junit:4.12")
-    compile("org.hamcrest:hamcrest-library:1.3")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
     compile("com.github.stephenc.jcip:jcip-annotations:1.0-1")
     compile("commons-codec:commons-codec:1.10")
@@ -26,6 +23,9 @@ dependencies {
     ).forEach { compile(it) }
 
     log4jCore().forEach { compile(it) }
+
+    testCompile("junit:junit:4.12")
+    testCompile("org.hamcrest:hamcrest-library:1.3")
 }
 
 fun aws(
