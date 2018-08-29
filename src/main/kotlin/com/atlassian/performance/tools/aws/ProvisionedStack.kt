@@ -7,6 +7,7 @@ import com.amazonaws.services.identitymanagement.model.*
 import com.amazonaws.services.s3.model.DeleteObjectsRequest
 import com.amazonaws.services.s3.model.MultiObjectDeleteException
 import com.atlassian.performance.tools.aws.Investment.TagKeys.bambooBuildKey
+import com.atlassian.performance.tools.aws.Investment.TagKeys.lifespanKey
 import com.atlassian.performance.tools.aws.Investment.TagKeys.userKey
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -33,7 +34,8 @@ class ProvisionedStack(
      *
      * Prevents the stack from being cleaned up too early by an external process.
      */
-    private val lifespan: Duration = Investment.parseLifespan(tags.map { Tag(it) }) ?: Duration.ofHours(1)
+    private val lifespan: Duration = Investment.parseLifespan(tags.map { Tag(it) })
+        ?: throw Exception("The stack '$stack' is not provisioned. It misses $lifespanKey tag.")
     val expiry: Instant = stack.creationTime.toInstant() + lifespan
 
     val user: String? = tags

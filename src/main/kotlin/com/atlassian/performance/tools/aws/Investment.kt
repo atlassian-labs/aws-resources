@@ -67,7 +67,7 @@ data class Investment(
     }
 
     companion object TagKeys {
-        private const val lifespanKey = "lifespan"
+        const val lifespanKey = "lifespan"
         private const val expiryKey = "expiry"
         const val userKey = "os_user_name"
         const val bambooBuildKey = "bamboo_result_key"

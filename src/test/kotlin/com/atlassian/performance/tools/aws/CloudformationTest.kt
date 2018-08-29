@@ -5,7 +5,6 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import com.amazonaws.services.cloudformation.model.Stack
-import com.amazonaws.services.cloudformation.model.StackStatus
 import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.hasSize
 import org.junit.Assert.assertThat
@@ -23,9 +22,7 @@ class CloudformationTest {
     @Test
     fun shouldNotListStacksWithoutLifespanTag() {
         val stacks: List<Stack> = listOf(
-            createStack(
-                Date(0)
-            )
+            FakeStacks().create()
         )
         val cloudformation = Cloudformation(awsMock, CloudformationMock(stacks))
 
@@ -39,11 +36,11 @@ class CloudformationTest {
         val twoMinutesAgo = Date(now().minus(ofMinutes(2)).toEpochMilli())
 
         val stacks: List<Stack> = listOf(
-            createStack(
-                twoMinutesAgo,
+            FakeStacks().create(
                 listOf(
                     Tag("lifespan", "PT1M").toCloudformation()
-                )
+                ),
+                twoMinutesAgo
             )
         )
         val cloudformation = Cloudformation(awsMock, CloudformationMock(stacks))
@@ -57,11 +54,11 @@ class CloudformationTest {
     fun shouldNotListStacksWithNotExpired() {
         val twoMinutesAgo = Date(now().minus(ofMinutes(2)).toEpochMilli())
         val stacks: List<Stack> = listOf(
-            createStack(
-                twoMinutesAgo,
+            FakeStacks().create(
                 listOf(
                     Tag("lifespan", "PT10M").toCloudformation()
-                )
+                ),
+                twoMinutesAgo
             )
         )
         val cloudformation = Cloudformation(awsMock, CloudformationMock(stacks))
@@ -69,18 +66,6 @@ class CloudformationTest {
         val expiredStacks = cloudformation.listExpiredStacks()
 
         assertThat(expiredStacks, empty())
-    }
-
-    private fun createStack(
-        creationTime: Date,
-        tags: List<com.amazonaws.services.cloudformation.model.Tag> = emptyList()
-    ): Stack {
-        val stack = Stack()
-        stack.creationTime = creationTime
-        stack.stackStatus = StackStatus.CREATE_COMPLETE.name
-        stack.stackName = "stack"
-        stack.setTags(tags)
-        return stack
     }
 
     private class CloudformationMock(

@@ -3,7 +3,9 @@ package com.atlassian.performance.tools.aws
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult
+import com.amazonaws.services.cloudformation.model.Stack
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.Matchers
 import org.junit.Assert.assertThat
 import org.junit.Test
 
@@ -24,6 +26,35 @@ class ScrollingCloudformationTest {
         shouldMakeOneRequestPerBatch(3)
     }
 
+    @Test
+    fun shouldReturnOnlyProvisionedStacks() {
+        val fakeStacks = FakeStacks()
+        val stackWithLifespan = fakeStacks.create(
+            listOf(
+                Tag("lifespan", "PT1M").toCloudformation()
+            )
+        )
+        val awsStacks: List<Stack> = listOf(
+            fakeStacks.create(),
+            fakeStacks.create(
+                listOf(
+                    Tag("tag", "value").toCloudformation()
+                )
+            ),
+            stackWithLifespan
+        )
+        val scrollingCloudformation = ScrollingCloudformation(
+            StacksCloudformation(
+                awsStacks
+            )
+        )
+
+        val scrolledStacks = mutableListOf<Stack>()
+        scrollingCloudformation.scrollThroughStacks { scrolledStacks += it }
+
+        assertThat(scrolledStacks, Matchers.contains(stackWithLifespan))
+    }
+
     private fun shouldMakeOneRequestPerBatch(
         batchCount: Int
     ) {
@@ -33,6 +64,16 @@ class ScrollingCloudformationTest {
         scrollingCloudformation.scrollThroughStacks {}
 
         assertThat(cloudformation.countRequests(), equalTo(batchCount))
+    }
+}
+
+private class StacksCloudformation(
+    private val stacks: List<Stack>
+) : AmazonCloudFormation by FakeCloudformation() {
+    override fun describeStacks(describeStacksRequest: DescribeStacksRequest?): DescribeStacksResult {
+        return DescribeStacksResult()
+            .withStacks(stacks)
+            .withNextToken(null)
     }
 }
 
