@@ -123,7 +123,7 @@ class Aws(
             .sorted()
             .first()
     }
-    val awaitingEc2: AwaitingEc2 = AwaitingEc2(ec2, terminationBatchingEc2, instanceNanny, defaultAmi)
+    val awaitingEc2: AwaitingEc2 by lazy { AwaitingEc2(ec2, terminationBatchingEc2, instanceNanny, defaultAmi) }
 
     val availabilityZones: List<AvailabilityZone> by lazy {
         ec2
