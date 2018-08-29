@@ -1,5 +1,6 @@
 package com.atlassian.performance.tools.aws
 
+import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import org.hamcrest.CoreMatchers.equalTo
@@ -41,7 +42,7 @@ class ScrollingCloudformationTest {
  */
 private class DescribingCloudformation(
     private val batchCount: Int
-) : FakeCloudformation() {
+) : AmazonCloudFormation by FakeCloudformation() {
 
     private var requestCount = 0
 

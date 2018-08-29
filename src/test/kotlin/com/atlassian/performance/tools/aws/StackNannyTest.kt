@@ -1,5 +1,6 @@
 package com.atlassian.performance.tools.aws
 
+import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult
 import com.amazonaws.services.cloudformation.model.ResourceStatus
@@ -34,7 +35,7 @@ class StackNannyTest {
 /**
  * Describes predefined resources for a predefined stack.
  */
-private class PredefinedResourcesCloudformation : FakeCloudformation() {
+private class PredefinedResourcesCloudformation : AmazonCloudFormation by FakeCloudformation() {
 
     override fun describeStackResources(
         describeStackResourcesRequest: DescribeStackResourcesRequest?

@@ -7,11 +7,7 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.*
 import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters
 
-/**
- * Open for overriding specific methods. No, Mockito is still not worth its magic.
- * Also, a great reminder to keep your interfaces lean.
- */
-open class FakeCloudformation : AmazonCloudFormation {
+class FakeCloudformation : AmazonCloudFormation {
     override fun updateStackInstances(updateStackInstancesRequest: UpdateStackInstancesRequest?): UpdateStackInstancesResult {
         throw Exception("unexpected call")
     }
@@ -96,6 +92,7 @@ open class FakeCloudformation : AmazonCloudFormation {
         throw Exception("unexpected call")
     }
 
+    @Suppress("OverridingDeprecatedMember")
     override fun setEndpoint(endpoint: String?) {
         throw Exception("unexpected call")
     }
@@ -176,6 +173,7 @@ open class FakeCloudformation : AmazonCloudFormation {
         throw Exception("unexpected call")
     }
 
+    @Suppress("OverridingDeprecatedMember")
     override fun setRegion(region: Region?) {
         throw Exception("unexpected call")
     }
