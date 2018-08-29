@@ -157,10 +157,12 @@ class Aws(
 
         val keys = ec2.describeKeyPairs().keyPairs.map { key ->
             RemoteSshKey(SshKeyName(key.keyName), ec2)
-        }
+        }.filter { it.isExpired() }
+
         val securityGroups = ec2.describeSecurityGroups().securityGroups.map { securityGroup ->
             Ec2SecurityGroup(securityGroup, ec2)
-        }
+        }.filter { it.isExpired() }
+
         waitUntilReleased(keys)
         waitUntilReleased(securityGroups)
     }
@@ -171,21 +173,20 @@ class Aws(
     ) {
         val deadline = now() + timeout
         resources
-            .mapNotNull { startReleasingIfExpired(it) }
+            .map { startReleasing(it) }
             .forEach { it.finishBy(deadline, logger) }
     }
 
-    private fun startReleasingIfExpired(
+    private fun startReleasing(
         resource: Resource
-    ): CompletableFuture<*>? {
-        return if (resource.isExpired()) {
-            resource.release().handle { throwable, _ ->
-                if (throwable != null) {
-                    logger.error("$resource failed to release itself", throwable)
-                }
+    ): CompletableFuture<*> {
+        if (!resource.isExpired()) {
+            throw Exception("You can't release $resource. It hasn't expired.")
+        }
+        return resource.release().handle { throwable, _ ->
+            if (throwable != null) {
+                logger.error("$resource failed to release itself", throwable)
             }
-        } else {
-            null
         }
     }
 
