@@ -2,13 +2,13 @@ val kotlinVersion = "1.2.30"
 
 plugins {
     kotlin("jvm").version("1.2.30")
-    id("com.atlassian.performance.tools.gradle-release").version("0.0.2")
+    id("com.atlassian.performance.tools.gradle-release").version("0.4.0")
 }
 
 dependencies {
-    compile("com.atlassian.performance.tools:concurrency:0.0.1")
-    compile("com.atlassian.performance.tools:io:0.0.1")
-    compile("com.atlassian.performance.tools:ssh:0.1.0")
+    compile("com.atlassian.performance.tools:concurrency:1.0.0-SNAPSHOT")
+    compile("com.atlassian.performance.tools:io:[1.0.0,2.0.0)")
+    compile("com.atlassian.performance.tools:ssh:[1.0.0,2.0.0)")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
     compile("com.github.stephenc.jcip:jcip-annotations:1.0-1")
     compile("commons-codec:commons-codec:1.10")

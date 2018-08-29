@@ -23,8 +23,8 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.support.AWSSupport
 import com.amazonaws.services.support.AWSSupportClientBuilder
-import com.atlassian.performance.tools.concurrency.finishBy
-import com.atlassian.performance.tools.io.readResourceText
+import com.atlassian.performance.tools.concurrency.api.finishBy
+import com.atlassian.performance.tools.io.api.readResourceText
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.time.Duration

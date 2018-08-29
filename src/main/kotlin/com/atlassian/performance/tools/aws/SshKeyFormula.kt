@@ -2,8 +2,8 @@ package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.CreateKeyPairRequest
-import com.atlassian.performance.tools.io.copy
-import com.atlassian.performance.tools.io.resolveSafely
+import com.atlassian.performance.tools.io.api.copy
+import com.atlassian.performance.tools.io.api.resolveSafely
 import java.nio.file.Path
 import java.time.Duration
 

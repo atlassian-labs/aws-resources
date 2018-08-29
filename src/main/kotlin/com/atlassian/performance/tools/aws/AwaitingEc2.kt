@@ -3,8 +3,8 @@ package com.atlassian.performance.tools.aws
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.*
 import com.amazonaws.waiters.WaiterParameters
-import com.atlassian.performance.tools.ssh.Ssh
-import com.atlassian.performance.tools.ssh.SshHost
+import com.atlassian.performance.tools.ssh.api.Ssh
+import com.atlassian.performance.tools.ssh.api.SshHost
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.time.Duration
