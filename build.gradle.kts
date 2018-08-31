@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    compile("com.atlassian.performance.tools:concurrency:1.0.0-SNAPSHOT")
+    compile("com.atlassian.performance.tools:concurrency:[1.0.0,2.0.0)")
     compile("com.atlassian.performance.tools:io:[1.0.0,2.0.0)")
     compile("com.atlassian.performance.tools:ssh:[1.0.0,2.0.0)")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")

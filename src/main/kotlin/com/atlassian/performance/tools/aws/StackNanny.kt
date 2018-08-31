@@ -27,16 +27,14 @@ class StackNanny(
             .filter { it.resourceType == "AWS::EC2::Instance" }
             .filter { ResourceStatus.fromValue(it.resourceStatus) == CREATE_FAILED }
         if (unluckyInstances.any { it.resourceStatusReason.startsWith("Your quota allows") }) {
-            requestGlobalQuotaIncrease()
+            throw Exception("$stackName stack failed due to a capacity problem: ${bumpGlobalLimit()}")
         }
     }
 
-    private fun requestGlobalQuotaIncrease() {
-        capacity.bump(
-            limitType = "EC2 general instance limit",
-            desiredLimit = { countAllocatedInstances() * 2 }
-        )
-    }
+    private fun bumpGlobalLimit(): String = capacity.bump(
+        limitType = "EC2 general instance limit",
+        desiredLimit = { countAllocatedInstances() * 2 }
+    )
 
     private fun countAllocatedInstances(): Int = ec2.findInstances(ec2.allocated()).size
 }

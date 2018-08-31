@@ -21,8 +21,6 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.amazonaws.services.support.AWSSupport
-import com.amazonaws.services.support.AWSSupportClientBuilder
 import com.atlassian.performance.tools.concurrency.api.finishBy
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.apache.logging.log4j.LogManager
@@ -31,9 +29,10 @@ import java.time.Duration
 import java.time.Instant.now
 import java.util.concurrent.CompletableFuture
 
-class Aws(
+class Aws @JvmOverloads constructor(
     val region: Regions,
-    credentialsProvider: AWSCredentialsProvider
+    credentialsProvider: AWSCredentialsProvider,
+    capacity: CapacityMediator = TextCapacityMediator()
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -65,10 +64,6 @@ class Aws(
         .withRegion(region)
         .withCredentials(credentialsProvider)
         .build()
-    private val support: AWSSupport = AWSSupportClientBuilder.standard()
-        .withRegion(Regions.US_EAST_1)
-        .withCredentials(credentialsProvider)
-        .build()
     private val scrollingCloudformation = ScrollingCloudformation(cloudformation)
     val batchingCloudformation by lazy { BatchingCloudformation(scrollingCloudformation) }
     private val scrollingEc2: ScrollingEc2 = TokenScrollingEc2(ec2)
@@ -79,7 +74,6 @@ class Aws(
         .withCredentials(credentialsProvider)
         .build()
 
-    private val capacity = SupportCapacityMediator(support, region)
     val stackNanny = StackNanny(cloudformation, scrollingEc2, capacity)
     private val instanceNanny = InstanceNanny(scrollingEc2, capacity)
 

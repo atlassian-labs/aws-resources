@@ -18,17 +18,23 @@ class StackNannyTest {
 
     @Test
     fun shouldComplainAboutGlobalInstanceLimit() {
-        val capacity = MemorizingCapacityMediator()
         val nanny = StackNanny(
             cloudformation = PredefinedResourcesCloudformation(),
             ec2 = PredefinedFilteringEc2(),
-            capacity = capacity
+            capacity = TextCapacityMediator()
         )
 
-        nanny.takeCare("a-failed-stack")
+        var exception: Exception? = null
+        try {
+            nanny.takeCare("a-failed-stack")
+        } catch (e: Exception) {
+            exception = e
+        }
 
-        assertThat(capacity.lastLimitType, equalTo("EC2 general instance limit"))
-        assertThat(capacity.lastDesiredLimit, equalTo(20))
+        assertThat(
+            exception?.message,
+            equalTo("a-failed-stack stack failed due to a capacity problem: You need to bump EC2 general instance limit to 20")
+        )
     }
 }
 
@@ -67,21 +73,6 @@ private class PredefinedResourcesCloudformation : AmazonCloudFormation by FakeCl
                     )
             ).shuffled()
         )
-    }
-}
-
-private class MemorizingCapacityMediator : CapacityMediator {
-
-    var lastLimitType: String? = null
-    var lastDesiredLimit: Int? = null
-
-    override fun bump(
-        limitType: String,
-        desiredLimit: () -> Int
-    ): String {
-        lastLimitType = limitType
-        lastDesiredLimit = desiredLimit()
-        return "Bumped $limitType to ${desiredLimit()}"
     }
 }
 
