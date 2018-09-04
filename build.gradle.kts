@@ -1,8 +1,15 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 val kotlinVersion = "1.2.30"
 
 plugins {
     kotlin("jvm").version("1.2.30")
     id("com.atlassian.performance.tools.gradle-release").version("0.4.0")
+}
+
+tasks.withType<Test>{
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = TestExceptionFormat.FULL
 }
 
 dependencies {
