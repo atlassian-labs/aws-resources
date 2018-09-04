@@ -3,6 +3,10 @@ package com.atlassian.performance.tools.aws
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.Stack
 import com.amazonaws.services.cloudformation.model.StackStatus
+import com.atlassian.performance.tools.aws.api.Aws
+import com.atlassian.performance.tools.aws.api.Investment
+import com.atlassian.performance.tools.aws.api.ProvisionedStack
+import com.atlassian.performance.tools.aws.api.ScrollingCloudformation
 
 internal class Cloudformation(
     private val aws: Aws,

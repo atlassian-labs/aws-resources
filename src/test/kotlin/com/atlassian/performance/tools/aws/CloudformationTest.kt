@@ -5,6 +5,8 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import com.amazonaws.services.cloudformation.model.Stack
+import com.atlassian.performance.tools.aws.api.Aws
+import com.atlassian.performance.tools.aws.api.Tag
 import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.hasSize
 import org.junit.Assert.assertThat

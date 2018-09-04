@@ -2,8 +2,11 @@ package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.InstanceStateName
+import com.atlassian.performance.tools.aws.api.Resource
+import com.atlassian.performance.tools.aws.api.TerminationBatchingEc2
+import com.atlassian.performance.tools.aws.api.TerminationPollingEc2
 
-class Ec2(
+internal class Ec2(
     private val ec2: AmazonEC2
 ) {
     fun listExpiredInstances(): List<Resource> {

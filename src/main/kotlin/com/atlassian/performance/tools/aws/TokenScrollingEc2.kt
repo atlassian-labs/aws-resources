@@ -5,11 +5,12 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest
 import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceStateName.*
+import com.atlassian.performance.tools.aws.api.ScrollingEc2
 
 /**
  * Scrolls through batches of AWS EC2 instances using "page token".
  */
-class TokenScrollingEc2(
+internal class TokenScrollingEc2(
     private val ec2: AmazonEC2
 ) : ScrollingEc2 {
     override fun scrollThroughInstances(

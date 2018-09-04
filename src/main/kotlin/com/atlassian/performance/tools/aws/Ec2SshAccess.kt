@@ -2,6 +2,8 @@ package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.*
+import com.atlassian.performance.tools.aws.api.AwaitingEc2
+import com.atlassian.performance.tools.aws.api.Investment
 
 internal class Ec2SshAccess(
     private val ec2: AmazonEC2,

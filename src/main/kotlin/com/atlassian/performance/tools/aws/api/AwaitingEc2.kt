@@ -1,0 +1,116 @@
+package com.atlassian.performance.tools.aws.api
+
+import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.model.*
+import com.amazonaws.waiters.WaiterParameters
+import com.atlassian.performance.tools.aws.*
+import com.atlassian.performance.tools.ssh.api.Ssh
+import com.atlassian.performance.tools.ssh.api.SshHost
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+import java.time.Duration
+import java.time.Instant.now
+
+class AwaitingEc2(
+    private val ec2: AmazonEC2,
+    private val terminationBatchingEc2: TerminationBatchingEc2,
+    private val instanceNanny: InstanceNanny,
+    private val defaultAmi: String
+) {
+    private val logger: Logger = LogManager.getLogger(this::class.java)
+
+    /**
+     * @param vpcId if null, the default VPC will be used
+     */
+    fun allocateInstance(
+        investment: Investment,
+        key: SshKey,
+        vpcId: String?,
+        customizeLaunch: (RunInstancesRequest) -> RunInstancesRequest
+    ): SshInstance {
+        val sshAccess = Ec2SshAccess(ec2, this).getSecurityGroup(investment, vpcId)
+        val startingInstance = startInstance(customizeLaunch(launchDefaults(key, investment, sshAccess)))
+        ec2.waiters().instanceRunning().run(WaiterParameters(startingInstance))
+        val startedInstance = ec2
+            .describeInstances(startingInstance)
+            .reservations
+            .flatMap { it.instances }
+            .single()
+        return SshInstance(
+            ssh = Ssh(SshHost(startedInstance.publicIpAddress, "ubuntu", key.file.path)),
+            resource = DependentResources(
+                user = Ec2Instance(startedInstance, terminationBatchingEc2),
+                dependency = Ec2SecurityGroup(sshAccess, ec2)
+            )
+        )
+    }
+
+    private fun launchDefaults(
+        key: SshKey,
+        investment: Investment,
+        sshAccess: SecurityGroup
+    ): RunInstancesRequest {
+        return RunInstancesRequest()
+            .withMinCount(1)
+            .withMaxCount(1)
+            .withImageId(defaultAmi)
+            .withKeyName(key.remote.name)
+            .withSecurityGroupIds(sshAccess.groupId)
+            .withTagSpecifications(
+                TagSpecification()
+                    .withResourceType(ResourceType.Instance)
+                    .withTags(investment.tag().map { it.toEc2() })
+            )
+    }
+
+    private fun startInstance(
+        launch: RunInstancesRequest
+    ): DescribeInstancesRequest {
+        val response = try {
+            ec2.runInstances(launch)
+        } catch (e: Exception) {
+            instanceNanny.takeCare(e, launch)
+        }
+        val instance = response
+            .reservation
+            .instances
+            .single()
+        return DescribeInstancesRequest().withInstanceIds(instance.instanceId)
+    }
+
+    fun allocateSecurityGroup(
+        investment: Investment,
+        request: CreateSecurityGroupRequest
+    ): SecurityGroup {
+        val securityGroup = allocateSecurityGroup(request)
+        ec2.createTags(
+            CreateTagsRequest()
+                .withTags(investment.tag().map { it.toEc2() })
+                .withResources(securityGroup.groupId)
+        )
+        return securityGroup
+    }
+
+    private fun allocateSecurityGroup(
+        request: CreateSecurityGroupRequest
+    ): SecurityGroup {
+        val securityGroup = ec2.createSecurityGroup(request)
+        val refresh = DescribeSecurityGroupsRequest().withGroupIds(securityGroup.groupId)
+        val timeout = Duration.ofSeconds(30)
+        val deadline = now() + timeout
+        do {
+            try {
+                val results = ec2
+                    .describeSecurityGroups(refresh)
+                    .securityGroups
+                if (results.size == 1) {
+                    return results.single()
+                }
+            } catch (e: Exception) {
+                logger.debug("Failed to find security group $refresh", e)
+            }
+            Thread.sleep(Duration.ofSeconds(5).toMillis())
+        } while (now().isBefore(deadline))
+        throw Exception("Failed to find with $refresh within $timeout")
+    }
+}
