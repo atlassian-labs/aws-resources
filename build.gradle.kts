@@ -4,6 +4,7 @@ val kotlinVersion = "1.2.30"
 
 plugins {
     kotlin("jvm").version("1.2.30")
+    `java-library`
     id("com.atlassian.performance.tools.gradle-release").version("0.4.0")
 }
 
@@ -13,12 +14,12 @@ tasks.withType<Test>{
 }
 
 dependencies {
-    compile("com.atlassian.performance.tools:concurrency:[1.0.0,2.0.0)")
-    compile("com.atlassian.performance.tools:io:[1.0.0,2.0.0)")
-    compile("com.atlassian.performance.tools:ssh:[1.0.0,2.0.0)")
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
-    compile("com.github.stephenc.jcip:jcip-annotations:1.0-1")
-    compile("commons-codec:commons-codec:1.10")
+    api("com.atlassian.performance.tools:ssh:[1.0.0,2.0.0)")
+    api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
+    implementation("com.atlassian.performance.tools:concurrency:[1.0.0,2.0.0)")
+    implementation("com.atlassian.performance.tools:io:[1.0.0,2.0.0)")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
+    implementation("commons-codec:commons-codec:1.10")
     aws(
         "ec2",
         "s3",
@@ -27,9 +28,9 @@ dependencies {
         "cloudformation",
         "elasticloadbalancing",
         "support"
-    ).forEach { compile(it) }
+    ).forEach { api(it) }
 
-    log4jCore().forEach { compile(it) }
+    log4jCore().forEach { implementation(it) }
 
     testCompile("junit:junit:4.12")
     testCompile("org.hamcrest:hamcrest-library:1.3")
