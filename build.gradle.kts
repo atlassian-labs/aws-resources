@@ -13,6 +13,18 @@ tasks.withType<Test>{
     testLogging.exceptionFormat = TestExceptionFormat.FULL
 }
 
+configurations.all {
+    resolutionStrategy {
+        failOnVersionConflict()
+        eachDependency {
+            when (requested.module.toString()) {
+                "commons-logging:commons-logging" -> useVersion("1.2")
+                "org.slf4j:slf4j-api" -> useVersion("1.8.0-alpha2")
+            }
+        }
+    }
+}
+
 dependencies {
     api("com.atlassian.performance.tools:ssh:[1.0.0,2.0.0)")
     api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
