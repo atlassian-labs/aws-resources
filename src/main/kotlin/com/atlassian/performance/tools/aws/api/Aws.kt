@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture
 class Aws @JvmOverloads constructor(
     val region: Regions,
     credentialsProvider: AWSCredentialsProvider,
-    capacity: CapacityMediator = TextCapacityMediator()
+    capacity: CapacityMediator = TextCapacityMediator(region)
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()

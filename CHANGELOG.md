@@ -23,6 +23,12 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/ssh/branches/compare/master%0Drelease-1.0.0
 
+### Added
+- Add `TextCapacityMediator(region: Regions)`.
+
+### Deprecated
+- Deprecate `TextCapacityMediator()`.
+
 ## [1.0.0]
 [1.0.0]: https://bitbucket.org/atlassian/ssh/branches/compare/master%0Drelease-0.0.3
 

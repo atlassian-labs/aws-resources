@@ -1,5 +1,6 @@
 package com.atlassian.performance.tools.aws.api
 
+import com.amazonaws.regions.Regions
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult
@@ -22,7 +23,7 @@ class StackNannyTest {
         val nanny = StackNanny(
             cloudformation = PredefinedResourcesCloudformation(),
             ec2 = PredefinedFilteringEc2(),
-            capacity = TextCapacityMediator()
+            capacity = TextCapacityMediator(Regions.US_EAST_1)
         )
 
         var exception: Exception? = null
@@ -34,7 +35,7 @@ class StackNannyTest {
 
         assertThat(
             exception?.message,
-            equalTo("a-failed-stack stack failed due to a capacity problem: You need to bump EC2 general instance limit to 20")
+            equalTo("a-failed-stack stack failed due to a capacity problem: You either need to bump EC2 general instance limit to 20 in us-east-1 manually or inject SupportCapacityMediator into Aws for automatic management")
         )
     }
 }
