@@ -35,7 +35,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ### Deprecated
 - Deprecate `TextCapacityMediator()`.
-- Deprecate the public constructor of `BatchingCloudformation`.
+- Deprecate `BatchingCloudformation` as public API.
 
 ### Fixed
 - Time out when detecting existing stacks matching a `StackFormula` instead of hanging indefinitely. Fix [JPERF-60].

@@ -13,7 +13,6 @@ import java.time.Instant.now
 import java.util.concurrent.TimeUnit
 
 /**
- * @property [investment] Tracks the CloudFormation stack expenses.
  * @property [aws] Serves the stack.
  * @property [cloudformationTemplate] Defines the resources to provision in a YAML format.
  * @property [parameters] Parametrize the [cloudformationTemplate].
@@ -73,7 +72,7 @@ data class StackFormula @JvmOverloads constructor(
     private fun find(): Stack? {
         return try {
             aws
-                .batchingCloudformation
+                .batchingCfn
                 .findStack(stackName)
                 .get(detectionTimeout.toMillis(), TimeUnit.MILLISECONDS)
         } catch (e: Exception) {
@@ -97,7 +96,7 @@ data class StackFormula @JvmOverloads constructor(
     private fun waitUntilOperational(): ProvisionedStack {
         val deadline = now() + pollingTimeout
         while (now() < deadline) {
-            val stack = aws.batchingCloudformation.findStack(stackName).get()
+            val stack = aws.batchingCfn.findStack(stackName).get()
             if (stack == null) {
                 logger.debug("Stack $stackName is not visible yet")
                 continue
