@@ -24,10 +24,13 @@ class StackFormulaTest {
                 lifespan = Duration.ofMinutes(1)
             ),
             aws = Aws(
+                batchingCloudformationRefreshPeriod = Duration.ofMillis(100),
                 region = Regions.DEFAULT_REGION,
                 credentialsProvider = MissingCredentialsProvider()
             ),
-            cloudformationTemplate = "malformed YAML content"
+            cloudformationTemplate = "malformed YAML content",
+            detectionTimeout = Duration.ofMillis(500),
+            pollingTimeout = Duration.ofSeconds(2)
         )
 
         val exception: Exception? = try {

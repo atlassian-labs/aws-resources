@@ -25,6 +25,8 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ### Added
 - Add `TextCapacityMediator(region: Regions)`.
+- Inject `detectionTimeout` and `pollingTimeout` into `StackFormula`.
+- Expose the behavior of `StackFormula`.
 
 ### Fixed
 - Bump AMI image version and improve error message. Fix [JPERF-103].
@@ -33,9 +35,15 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ### Deprecated
 - Deprecate `TextCapacityMediator()`.
+- Deprecate the public constructor of `BatchingCloudformation`.
+
+### Fixed
+- Time out when detecting existing stacks matching a `StackFormula` instead of hanging indefinitely. Fix [JPERF-60].
+
+[JPERF-60]: https://ecosystem.atlassian.net/browse/JPERF-60
 
 ## [1.0.0]
-[1.0.0]: https://bitbucket.org/atlassian/ssh/branches/compare/master%0Drelease-0.0.3
+[1.0.0]: https://bitbucket.org/atlassian/ssh/branches/compare/1.0.0%0Drelease-0.0.3
 
 ### Changed
 - Define public API for the module.

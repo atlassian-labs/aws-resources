@@ -21,7 +21,9 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.atlassian.performance.tools.aws.*
+import com.atlassian.performance.tools.aws.Cloudformation
+import com.atlassian.performance.tools.aws.Ec2
+import com.atlassian.performance.tools.aws.TokenScrollingEc2
 import com.atlassian.performance.tools.concurrency.api.finishBy
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.apache.logging.log4j.LogManager
@@ -33,7 +35,8 @@ import java.util.concurrent.CompletableFuture
 class Aws @JvmOverloads constructor(
     val region: Regions,
     credentialsProvider: AWSCredentialsProvider,
-    capacity: CapacityMediator = TextCapacityMediator(region)
+    capacity: CapacityMediator = TextCapacityMediator(region),
+    batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -66,7 +69,7 @@ class Aws @JvmOverloads constructor(
         .withCredentials(credentialsProvider)
         .build()
     private val scrollingCloudformation = ScrollingCloudformation(cloudformation)
-    val batchingCloudformation by lazy { BatchingCloudformation(scrollingCloudformation) }
+    val batchingCloudformation = BatchingCloudformation(scrollingCloudformation, batchingCloudformationRefreshPeriod)
     private val scrollingEc2: ScrollingEc2 = TokenScrollingEc2(ec2)
     private val terminationPollingEc2 by lazy { TerminationPollingEc2(scrollingEc2) }
     val terminationBatchingEc2 by lazy { TerminationBatchingEc2(ec2, terminationPollingEc2) }

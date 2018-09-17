@@ -10,12 +10,23 @@ import org.apache.logging.log4j.LogManager
 import java.security.MessageDigest
 import java.time.Duration
 import java.time.Instant.now
+import java.util.concurrent.TimeUnit
 
-data class StackFormula(
+/**
+ * @property [investment] Tracks the CloudFormation stack expenses.
+ * @property [aws] Serves the stack.
+ * @property [cloudformationTemplate] Defines the resources to provision in a YAML format.
+ * @property [parameters] Parametrize the [cloudformationTemplate].
+ * @property [detectionTimeout] Gives time to detect an existing matching stack for reuse.
+ * @property [pollingTimeout] Gives time for the stack to transition to a successful state.
+ */
+data class StackFormula @JvmOverloads constructor(
     private val investment: Investment,
     private val aws: Aws,
     private val cloudformationTemplate: String,
-    private val parameters: List<Parameter> = listOf()
+    private val parameters: List<Parameter> = listOf(),
+    private val detectionTimeout: Duration = Duration.ofMinutes(3),
+    private val pollingTimeout: Duration = Duration.ofMinutes(30)
 ) {
 
     private val logger = LogManager.getLogger(this::class.java)
@@ -34,6 +45,12 @@ data class StackFormula(
         val parameters: List<Parameter>
     )
 
+    /**
+     * Provisions a CloudFormation stack using [aws] and tagging it with [investment].
+     * The stack resources are defined by [cloudformationTemplate] parametrized by [parameters].
+     * Tries to detect an existing matching stack to reuse, unless [detectionTimeout] runs out.
+     * Polls the stack status to reach a usable state for up to [pollingTimeout].
+     */
     fun provision(): ProvisionedStack {
         ensureExistence()
         return waitUntilOperational()
@@ -58,7 +75,7 @@ data class StackFormula(
             aws
                 .batchingCloudformation
                 .findStack(stackName)
-                .get()
+                .get(detectionTimeout.toMillis(), TimeUnit.MILLISECONDS)
         } catch (e: Exception) {
             logger.debug("Failed to find stack: ${e.message}")
             null
@@ -78,8 +95,7 @@ data class StackFormula(
     }
 
     private fun waitUntilOperational(): ProvisionedStack {
-        val timeout = Duration.ofMinutes(30)
-        val deadline = now() + timeout
+        val deadline = now() + pollingTimeout
         while (now() < deadline) {
             val stack = aws.batchingCloudformation.findStack(stackName).get()
             if (stack == null) {
@@ -102,6 +118,6 @@ data class StackFormula(
                 }
             }
         }
-        throw Exception("Stack $stackName provisioning timed out: $timeout")
+        throw Exception("Stack $stackName provisioning timed out: $pollingTimeout")
     }
 }
