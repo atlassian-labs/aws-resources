@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/ssh/branches/compare/master%0Drelease-1.0.0
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.1.0
+
+## [1.1.0]
+[1.1.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/1.1.0%0Drelease-1.0.0
 
 ### Added
 - Add `TextCapacityMediator(region: Regions)`.
@@ -43,7 +46,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 [JPERF-60]: https://ecosystem.atlassian.net/browse/JPERF-60
 
 ## [1.0.0]
-[1.0.0]: https://bitbucket.org/atlassian/ssh/branches/compare/1.0.0%0Drelease-0.0.3
+[1.0.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/1.0.0%0Drelease-0.0.3
 
 ### Changed
 - Define public API for the module.
@@ -54,20 +57,20 @@ Dropping a requirement of a major version of a dependency is a new contract.
 - Add this changelog.
 
 ## [0.0.3] - 2018-08-29
-[0.0.3]: https://bitbucket.org/atlassian/ssh/branches/compare/release-0.0.3%0Drelease-0.0.2
+[0.0.3]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-0.0.3%0Drelease-0.0.2
 
 ### Fixed
 - Remove only stacks which "lifespan" tag.
 - Don't send requests to AWS while creating Aws object.
 
 ## [0.0.2] - 2018-08-29
-[0.0.2]: https://bitbucket.org/atlassian/ssh/branches/compare/release-0.0.2%0Drelease-0.0.1
+[0.0.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-0.0.2%0Drelease-0.0.1
 
 ### Added
 - License.
 
 ## [0.0.1] - 2018-08-22
-[0.0.1]: https://bitbucket.org/atlassian/ssh/branches/compare/release-0.0.1%0Dinitial-commit
+[0.0.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-0.0.1%0Dinitial-commit
 
 ### Added
 - Migrate aws-resources from [JPT submodule].
