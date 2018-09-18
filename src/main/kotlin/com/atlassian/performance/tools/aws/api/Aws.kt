@@ -104,17 +104,20 @@ class Aws @JvmOverloads constructor(
         ).provision()
     }
 
+    private val amiName = "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180912"
     val defaultAmi: String by lazy {
         ec2
             .describeImages(
                 DescribeImagesRequest().withFilters(
-                    Filter("name", listOf("ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20171011"))
+                    Filter("name", listOf(amiName))
                 )
             )
             .images
             .map { it.imageId }
             .sorted()
-            .first()
+            .firstOrNull()
+            ?: throw Exception("Failed to find image $amiName in $region")
+
     }
     val awaitingEc2: AwaitingEc2 by lazy { AwaitingEc2(ec2, terminationBatchingEc2, instanceNanny, defaultAmi) }
 

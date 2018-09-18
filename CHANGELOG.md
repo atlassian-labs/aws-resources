@@ -26,6 +26,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ### Added
 - Add `TextCapacityMediator(region: Regions)`.
 
+### Fixed
+- Bump AMI image version and improve error message. Fix [JPERF-103].
+
+[JPERF-103]: https://ecosystem.atlassian.net/browse/JPERF-103
+
 ### Deprecated
 - Deprecate `TextCapacityMediator()`.
 
