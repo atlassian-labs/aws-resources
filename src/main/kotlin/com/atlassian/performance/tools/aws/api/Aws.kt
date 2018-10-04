@@ -156,7 +156,7 @@ class Aws @JvmOverloads constructor(
 
     fun cleanLeftovers() {
         val stacks = Cloudformation(this, cloudformation).listExpiredStacks()
-        waitUntilReleased(stacks)
+        waitUntilReleased(stacks, Duration.ofMinutes(5))
 
         val instances = Ec2(ec2).listExpiredInstances()
         waitUntilReleased(instances, timeout = Duration.ofMinutes(2))

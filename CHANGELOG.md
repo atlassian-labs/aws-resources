@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.1.0
 
+## Fixed
+- Have more patience for stack cleanup. Fix [JPERF-86].
+
+[JPERF-86]: https://ecosystem.atlassian.net/browse/JPERF-86
+
 ## [1.1.0]
 [1.1.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/1.1.0%0Drelease-1.0.0
 
