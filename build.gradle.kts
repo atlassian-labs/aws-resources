@@ -15,6 +15,7 @@ tasks.withType<Test>{
 
 configurations.all {
     resolutionStrategy {
+        activateDependencyLocking()
         failOnVersionConflict()
         eachDependency {
             when (requested.module.toString()) {
