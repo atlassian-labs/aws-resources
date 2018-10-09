@@ -53,7 +53,7 @@ fun aws(
     vararg modules: String
 ): List<String> = modules
     .map { module ->
-        "com.amazonaws:aws-java-sdk-$module:1.11.298"
+        "com.amazonaws:aws-java-sdk-$module:1.11.424"
     }
     .plus(log4j("jcl"))
     .plus(jaxb())
