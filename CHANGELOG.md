@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.1.0
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.1.1
+
+## [1.1.1] - 2018-10-09
+[1.1.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.1.1%0Drelease-1.1.0
 
 ## Fixed
 - Have more patience for stack cleanup. Fix [JPERF-86].
@@ -30,8 +33,8 @@ Dropping a requirement of a major version of a dependency is a new contract.
 [JPERF-86]: https://ecosystem.atlassian.net/browse/JPERF-86
 [JPERF-186]: https://ecosystem.atlassian.net/browse/JPERF-186
 
-## [1.1.0]
-[1.1.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/1.1.0%0Drelease-1.0.0
+## [1.1.0] - 2018-09-18
+[1.1.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.1.0%0Drelease-1.0.0
 
 ### Added
 - Add `TextCapacityMediator(region: Regions)`.
@@ -52,8 +55,8 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 [JPERF-60]: https://ecosystem.atlassian.net/browse/JPERF-60
 
-## [1.0.0]
-[1.0.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/1.0.0%0Drelease-0.0.3
+## [1.0.0] - 2018-09-04
+[1.0.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.0.0%0Drelease-0.0.3
 
 ### Changed
 - Define public API for the module.
