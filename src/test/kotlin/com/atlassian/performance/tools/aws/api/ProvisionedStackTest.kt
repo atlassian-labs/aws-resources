@@ -1,16 +1,10 @@
 package com.atlassian.performance.tools.aws.api
 
-import com.amazonaws.regions.Regions
-import com.atlassian.performance.tools.aws.FakeAwsCredentialsProvider
+import com.atlassian.performance.tools.aws.FakeAws
 import com.atlassian.performance.tools.aws.FakeStacks
 import org.junit.Test
-import java.lang.Exception
 
 class ProvisionedStackTest {
-    private val awsMock = Aws(
-        Regions.DEFAULT_REGION,
-        FakeAwsCredentialsProvider()
-    )
 
     @Test
     fun shouldCreateProvisionedStackForStacksWithLifespanTag() {
@@ -21,7 +15,7 @@ class ProvisionedStackTest {
                         Tag("lifespan", "PT10M").toCloudformation()
                     )
                 ),
-            aws = awsMock
+            aws = FakeAws.awsForUnitTests()
         )
     }
 
@@ -30,7 +24,7 @@ class ProvisionedStackTest {
         ProvisionedStack(
             FakeStacks()
                 .create(),
-            awsMock
+            FakeAws.awsForUnitTests()
         )
     }
 }

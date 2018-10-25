@@ -1,11 +1,9 @@
 package com.atlassian.performance.tools.aws
 
-import com.amazonaws.regions.Regions
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import com.amazonaws.services.cloudformation.model.Stack
-import com.atlassian.performance.tools.aws.api.Aws
 import com.atlassian.performance.tools.aws.api.Tag
 import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.hasSize
@@ -16,10 +14,7 @@ import java.time.Instant.now
 import java.util.*
 
 class CloudformationTest {
-    private val awsMock = Aws(
-        Regions.DEFAULT_REGION,
-        FakeAwsCredentialsProvider()
-    )
+    private val awsMock = FakeAws.awsForUnitTests()
 
     @Test
     fun shouldNotListStacksWithoutLifespanTag() {

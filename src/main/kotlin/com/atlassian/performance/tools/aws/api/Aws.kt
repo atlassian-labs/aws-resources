@@ -33,11 +33,13 @@ import java.time.Duration
 import java.time.Instant.now
 import java.util.concurrent.CompletableFuture
 
-class Aws @JvmOverloads constructor(
+class Aws private constructor(
     val region: Regions,
     credentialsProvider: AWSCredentialsProvider,
-    capacity: CapacityMediator = TextCapacityMediator(region),
-    batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
+    capacity: CapacityMediator,
+    batchingCloudformationRefreshPeriod: Duration,
+    regionsWithHousekeeping: List<Regions>,
+    requireHousekeeping: Boolean
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -136,6 +138,86 @@ class Aws @JvmOverloads constructor(
             .filter { AvailabilityZoneState.fromValue(it.state) == AvailabilityZoneState.Available }
     }
 
+    init {
+        if (region !in regionsWithHousekeeping) {
+            val message = """
+                *************************************************************************************************
+
+                ATTENTION!
+                YOU RISK LOSING MONEY on unnecessary AWS charges if you don't clean up AWS resources in
+                the ${region.describe()} AWS region.
+
+                All AWS resources provisioned by this code are marked with a `lifespan` or `expiry` tag/metadata.
+                You can control that duration via the `Investment` class.
+                After a resource is past its lifespan/expiry, it is eligible for cleanup by any housekeeping call.
+                You can invoke housekeeping via the `cleanLeftovers` method on this object.
+                Make sure the `region` set in the constructor equals $region.
+                Run this housekeeping periodically, for example every 30 minutes. A CI server or cron can work.
+
+                When you do ensure that this region has housekeeping taken care of, you can get rid of this error,
+                by adding the region to the `regionsWithHousekeeping` list in the constructor.
+
+                **************************************************************************************************
+            """.trimIndent()
+            if (requireHousekeeping) {
+                throw Exception(message)
+            } else {
+                logger.error(message)
+            }
+        }
+        val safeRegionsList = regionsWithHousekeeping.joinToString(prefix = "- ", separator = "\n")
+        logger.info(
+            """
+                You already declared that AWS housekeeping is taken care of in the following regions:
+                $safeRegionsList
+                Make sure this list makes sense from time to time.
+            """.trimIndent()
+        )
+    }
+
+    /**
+     * @param [credentialsProvider] A way to authenticate with your AWS account. This account will be used and billed.
+     * @param [region] AWS region to allocate all resources in. Note that many kinds of resources are region-specific.
+     * @param [regionsWithHousekeeping] Declaration, that the caller took care of AWS housekeeping in these regions.
+     * @param [capacity] A way to manage capacity if you use more AWS resources than usual.
+     * @param [batchingCloudformationRefreshPeriod] Gives time for the batch requests to accumulate single requests.
+     *                                              Trades off between AWS throttling and Cloudformation latency.
+     */
+    constructor(
+        credentialsProvider: AWSCredentialsProvider,
+        region: Regions,
+        regionsWithHousekeeping: List<Regions>,
+        capacity: CapacityMediator,
+        batchingCloudformationRefreshPeriod: Duration
+    ) : this(
+        region = region,
+        credentialsProvider = credentialsProvider,
+        capacity = capacity,
+        batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
+        regionsWithHousekeeping = regionsWithHousekeeping,
+        requireHousekeeping = true
+    )
+
+    @Deprecated(
+        message = "Use the 5-argument constructor. " +
+            "This constructor is unsafe, because it doesn't fail-fast for missing AWS housekeeping declarations. " +
+            "It's left here only for compatibility. Move away from it as fast as possible."
+    )
+    @JvmOverloads
+    constructor(
+        region: Regions,
+        credentialsProvider: AWSCredentialsProvider,
+        capacity: CapacityMediator = TextCapacityMediator(region),
+        batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
+    ) : this(
+        region = region,
+        credentialsProvider = credentialsProvider,
+        capacity = capacity,
+        batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
+        regionsWithHousekeeping = emptyList(),
+        requireHousekeeping = false
+    )
+
     fun jiraStorage(
         nonce: String
     ) = shortTermStorage.findStorage("JiraBucket", nonce)
@@ -199,4 +281,6 @@ class Aws @JvmOverloads constructor(
     fun listDisposableStacks(): List<Stack> {
         return Cloudformation(this, cloudformation).listDisposableStacks()
     }
+
+    private fun Regions.describe(): String = "$name ($description)"
 }

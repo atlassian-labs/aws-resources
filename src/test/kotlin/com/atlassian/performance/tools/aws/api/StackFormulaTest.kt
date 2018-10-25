@@ -2,7 +2,7 @@ package com.atlassian.performance.tools.aws.api
 
 import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.regions.Regions
+import com.atlassian.performance.tools.aws.FakeAws
 import com.atlassian.performance.tools.aws.FakeAwsCredentialsProvider
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.Assert.assertThat
@@ -23,9 +23,8 @@ class StackFormulaTest {
                 useCase = "Unit test the StackFormula",
                 lifespan = Duration.ofMinutes(1)
             ),
-            aws = Aws(
+            aws = FakeAws.awsForUnitTests(
                 batchingCloudformationRefreshPeriod = Duration.ofMillis(100),
-                region = Regions.DEFAULT_REGION,
                 credentialsProvider = MissingCredentialsProvider()
             ),
             cloudformationTemplate = "malformed YAML content",

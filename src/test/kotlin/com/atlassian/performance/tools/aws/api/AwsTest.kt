@@ -2,7 +2,7 @@ package com.atlassian.performance.tools.aws.api
 
 import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.regions.Regions
+import com.atlassian.performance.tools.aws.FakeAws
 import com.atlassian.performance.tools.aws.FakeAwsCredentialsProvider
 import org.junit.Test
 
@@ -15,6 +15,6 @@ class AwsTest {
 
     @Test
     fun shouldNotUseCredentialsInConstructor() {
-        Aws(Regions.DEFAULT_REGION, MyAwsCredentialsProvider())
+        FakeAws.awsForUnitTests(credentialsProvider = MyAwsCredentialsProvider())
     }
 }

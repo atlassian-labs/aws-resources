@@ -23,6 +23,14 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.1.1
 
+### Added
+- Fail or warn users if they didn't explicitly declare they took care of AWS housekeeping. Mitigate [JPERF-235].
+
+### Deprecated
+- Deprecate the compatibility `Aws` constructor, which only warns users instead of failing fast.
+
+[JPERF-235]: https://ecosystem.atlassian.net/browse/JPERF-235
+
 ## [1.1.1] - 2018-10-09
 [1.1.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.1.1%0Drelease-1.1.0
 
