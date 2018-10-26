@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.1.1
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.2.0
+
+## [1.2.0] - 2018-10-26
+[1.2.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.2.0%0Drelease-1.1.1
 
 ### Added
 - Fail or warn users if they didn't explicitly declare they took care of AWS housekeeping. Mitigate [JPERF-235].
