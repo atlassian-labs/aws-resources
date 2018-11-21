@@ -1,9 +1,9 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
-val kotlinVersion = "1.2.30"
+val kotlinVersion = "1.2.70"
 
 plugins {
-    kotlin("jvm").version("1.2.30")
+    kotlin("jvm").version("1.2.70")
     `java-library`
     id("com.atlassian.performance.tools.gradle-release").version("0.4.3")
 }
@@ -22,12 +22,15 @@ configurations.all {
                 "commons-logging:commons-logging" -> useVersion("1.2")
                 "org.slf4j:slf4j-api" -> useVersion("1.8.0-alpha2")
             }
+            when (requested.group) {
+                "org.jetbrains.kotlin" -> useVersion(kotlinVersion)
+            }
         }
     }
 }
 
 dependencies {
-    api("com.atlassian.performance.tools:ssh:[1.0.0,2.0.0)")
+    api("com.atlassian.performance.tools:ssh:[1.0.0,3.0.0)")
     api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
     implementation("com.atlassian.performance.tools:concurrency:[1.0.0,2.0.0)")
     implementation("com.atlassian.performance.tools:io:[1.0.0,2.0.0)")

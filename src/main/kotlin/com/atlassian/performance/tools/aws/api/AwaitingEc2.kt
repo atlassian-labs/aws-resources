@@ -37,7 +37,10 @@ class AwaitingEc2(
             .flatMap { it.instances }
             .single()
         return SshInstance(
-            ssh = Ssh(SshHost(startedInstance.publicIpAddress, "ubuntu", key.file.path)),
+            ssh = Ssh(
+                host = SshHost(startedInstance.publicIpAddress, "ubuntu", key.file.path),
+                connectivityPatience = 4
+            ),
             resource = DependentResources(
                 user = Ec2Instance(startedInstance, terminationBatchingEc2),
                 dependency = Ec2SecurityGroup(sshAccess, ec2)
