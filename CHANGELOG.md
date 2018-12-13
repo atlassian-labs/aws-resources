@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.3.0
 
+### Fixed
+- Do not disable CloudFormation stack rollback. Resolve [JPERF-294].
+
+[JPERF-294]: https://ecosystem.atlassian.net/browse/JPERF-294
+
 ## [1.3.0] - 2018-11-21
 [1.3.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.3.0%0Drelease-1.2.0
 

@@ -89,7 +89,6 @@ data class StackFormula @JvmOverloads constructor(
                 .withTemplateBody(cloudformationTemplate)
                 .withParameters(parameters)
                 .withCapabilities(Capability.CAPABILITY_IAM)
-                .withDisableRollback(true)
         )
     }
 
