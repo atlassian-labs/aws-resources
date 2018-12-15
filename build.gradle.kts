@@ -50,6 +50,7 @@ dependencies {
 
     testCompile("junit:junit:4.12")
     testCompile("org.hamcrest:hamcrest-library:1.3")
+    testCompile("org.assertj:assertj-core:3.11.1")
 }
 
 fun aws(
@@ -77,6 +78,12 @@ fun jaxb(): List<String> = listOf(
     "org.glassfish.jaxb:jaxb-runtime:2.3.0",
     "javax.activation:activation:1.1.1"
 )
+
+val cleanLeftovers = task<Test>("awsCleanLeftovers")
+cleanLeftovers.description = "Deletes every stack that exceeded its lifespan."
+cleanLeftovers.useJUnit {
+    includeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
+}
 
 val wrapper = tasks["wrapper"] as Wrapper
 wrapper.gradleVersion = "4.9"

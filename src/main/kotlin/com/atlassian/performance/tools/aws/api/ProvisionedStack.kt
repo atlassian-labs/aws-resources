@@ -3,7 +3,10 @@ package com.atlassian.performance.tools.aws.api
 import com.amazonaws.services.cloudformation.model.*
 import com.amazonaws.services.ec2.model.*
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
-import com.amazonaws.services.identitymanagement.model.*
+import com.amazonaws.services.identitymanagement.model.DeleteRolePolicyRequest
+import com.amazonaws.services.identitymanagement.model.DetachRolePolicyRequest
+import com.amazonaws.services.identitymanagement.model.ListAttachedRolePoliciesRequest
+import com.amazonaws.services.identitymanagement.model.ListRolePoliciesRequest
 import com.amazonaws.services.s3.model.DeleteObjectsRequest
 import com.amazonaws.services.s3.model.MultiObjectDeleteException
 import com.atlassian.performance.tools.aws.api.Investment.TagKeys.bambooBuildKey
@@ -213,7 +216,7 @@ class ProvisionedStack(
             )
             .attachedPolicies
             .map { it.policyArn }
-            .forEach { detachAttachedPolicy(it) }
+            .forEach { detachAttachedPolicy(it, roleName) }
         aws
             .iam
             .listRolePolicies(
@@ -224,32 +227,14 @@ class ProvisionedStack(
     }
 
     private fun detachAttachedPolicy(
-        policyArn: String
+        policyArn: String,
+        roleName: String
     ) {
-        val entities = aws.iam.listEntitiesForPolicy(
-            ListEntitiesForPolicyRequest().withPolicyArn(policyArn)
+        aws.iam.detachRolePolicy(
+            DetachRolePolicyRequest()
+                .withRoleName(roleName)
+                .withPolicyArn(policyArn)
         )
-        entities.policyGroups.forEach { policyGroup ->
-            aws.iam.detachGroupPolicy(
-                DetachGroupPolicyRequest()
-                    .withGroupName(policyGroup.groupName)
-                    .withPolicyArn(policyArn)
-            )
-        }
-        entities.policyRoles.forEach { policyRole ->
-            aws.iam.detachRolePolicy(
-                DetachRolePolicyRequest()
-                    .withRoleName(policyRole.roleName)
-                    .withPolicyArn(policyArn)
-            )
-        }
-        entities.policyUsers.forEach { policyUser ->
-            aws.iam.detachUserPolicy(
-                DetachUserPolicyRequest()
-                    .withUserName(policyUser.userName)
-                    .withPolicyArn(policyArn)
-            )
-        }
     }
 
     private fun deleteInlinePolicy(
