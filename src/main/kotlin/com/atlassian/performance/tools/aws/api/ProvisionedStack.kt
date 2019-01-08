@@ -201,6 +201,7 @@ class ProvisionedStack(
     }
 
     private fun cleanRoles() {
+        logger.debug("Cleaning roles in $stackName")
         filterResources("AWS::IAM::Role")
             .map { it.physicalResourceId }
             .forEach { cleanRole(it) }

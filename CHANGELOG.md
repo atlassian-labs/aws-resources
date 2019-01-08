@@ -25,8 +25,10 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ### Fixed
 - Stop detaching the policies from all stacks. Resolve [JPERF-317].
+- Block until both `User` and `Dependency` are released when releasing `DependentResources`. Resolve [JPERF-337].
 
 [JPERF-317]: https://ecosystem.atlassian.net/browse/JPERF-317
+[JPERF-337]: https://ecosystem.atlassian.net/browse/JPERF-337
 
 ## [1.3.1] - 2018-12-14
 [1.3.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.3.1%0Drelease-1.3.0

@@ -9,6 +9,6 @@ data class DependentResources(
     override fun isExpired(): Boolean = user.isExpired()
 
     override fun release(): CompletableFuture<*> {
-        return user.release().thenAccept { dependency.release() }
+        return user.release().thenRun { dependency.release().get() }
     }
 }
