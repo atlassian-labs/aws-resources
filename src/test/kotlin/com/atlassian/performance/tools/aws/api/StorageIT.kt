@@ -49,4 +49,43 @@ class StorageIT {
 
         assertThat(actualFileContent).isEqualTo(expectedFileContent)
     }
+
+    @Test
+    fun shouldUploadAndDownloadSymmetrically() {
+        val upload = folder.newFolder("actualFolder")
+        val subfolder = upload.resolve("subfolder")
+        subfolder.mkdir()
+        val file = subfolder.resolve("testfile.txt")
+        file.createNewFile()
+        val nonce = "StorageTest.shouldUploadAndDownloadSymmetrically.${UUID.randomUUID()}"
+
+        val storage = IntegrationTestRuntime.aws.resultsStorage(nonce)
+        storage.upload(upload)
+        val download = storage.download(folder.newFolder("expectedFolder").toPath()).toFile()
+
+        assertThat(download).exists()
+        assertThat(download.list()).isEqualTo(upload.list())
+    }
+
+    @Test
+    fun shouldBeAbleToCacheResults() {
+        val upload = folder.newFolder("actualFolder")
+        val subfolder = upload.resolve("subfolder")
+        subfolder.mkdir()
+        val file = subfolder.resolve("testfile.txt")
+        file.createNewFile()
+        val nonce = "StorageTest.shouldBeAbleToCacheResults.${UUID.randomUUID()}"
+        val storage = IntegrationTestRuntime.aws.resultsStorage(nonce)
+        storage.upload(upload)
+        val download = storage.download(folder.newFolder("download").toPath()).toFile()
+
+        val cacheNonce = "StorageTest.shouldBeAbleToCacheResults.${UUID.randomUUID()}"
+        val cache = IntegrationTestRuntime.aws.resultsStorage(cacheNonce)
+        cache.upload(download)
+        val cachedResults = cache.download(folder.newFolder("cache").toPath()).toFile()
+
+        assertThat(cachedResults).exists()
+        assertThat(cachedResults.list()).isEqualTo(upload.list())
+        assertThat(cachedResults.list()).isEqualTo(download.list())
+    }
 }
