@@ -85,6 +85,24 @@ cleanLeftovers.useJUnit {
     includeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
 }
 
+
+tasks.getByName("test", Test::class).apply {
+    useJUnit {
+        exclude("**/*IT.class")
+        excludeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
+    }
+}
+
+val testIntegration = task<Test>("testIntegration") {
+    useJUnit {
+        include("**/*IT.class")
+        excludeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
+    }
+    maxParallelForks = 4
+}
+
+tasks["check"].dependsOn(testIntegration)
+
 val wrapper = tasks["wrapper"] as Wrapper
 wrapper.gradleVersion = "4.9"
 wrapper.distributionType = Wrapper.DistributionType.ALL
