@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.3.2
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.3.3
+
+## [1.3.3] - 2019-01-16
+[1.3.3]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.3.3%0Drelease-1.3.2
 
 ### Fixed
 - Fix escape special characters when creating a URI for `Storage`. Resolve [JPERF-358].
