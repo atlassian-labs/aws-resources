@@ -29,11 +29,29 @@ data class Storage(
         upload(
             file = file,
             bucketName = bucketName,
-            key = "$prefix/${file.name}"
+            prefix = prefix
         )
     }
 
     private fun upload(
+        file: File,
+        bucketName: String,
+        prefix: String
+    ) {
+        if (file.isDirectory) {
+            Files.newDirectoryStream(file.toPath()).use {
+                it.forEach {
+                    uploadRecursively(it.toFile(), bucketName, "$prefix/${it.fileName}")
+                }
+            }
+        } else {
+            val fileKey = "$prefix/${file.name}"
+            logger.debug("Uploading $file to $bucketName under $fileKey")
+            s3.putObject(bucketName, fileKey, file)
+        }
+    }
+
+    private fun uploadRecursively(
         file: File,
         bucketName: String,
         key: String
@@ -41,7 +59,7 @@ data class Storage(
         if (file.isDirectory) {
             Files.newDirectoryStream(file.toPath()).use {
                 it.forEach {
-                    upload(it.toFile(), bucketName, "$key/${it.fileName}")
+                    uploadRecursively(it.toFile(), bucketName, "$key/${it.fileName}")
                 }
             }
         } else {
@@ -64,7 +82,7 @@ data class Storage(
             download(listing, rootTarget)
             token = listing.nextContinuationToken
         } while (token != null)
-        return rootTarget.resolve(bucketName).resolve(prefix)
+        return rootTarget
     }
 
     private fun download(
@@ -75,7 +93,8 @@ data class Storage(
             .objectSummaries
             .map { it.key }
             .forEach { key ->
-                val leafTarget = rootTarget.resolve(bucketName).resolve(key)
+                val path = key.removePrefix("$prefix/")
+                val leafTarget = rootTarget.resolve(path)
                 logger.debug("Downloading $bucketName/$key into $leafTarget")
                 s3.getObject(bucketName, key).objectContent.use { stream ->
                     stream.copy(leafTarget)
