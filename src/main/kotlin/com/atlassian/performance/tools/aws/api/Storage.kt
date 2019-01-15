@@ -20,7 +20,7 @@ data class Storage(
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
-    val uri: URI = URI("s3://$bucketName/$prefix")
+    val uri: URI = URI("s3", "//$bucketName/$prefix", null)
     val location = StorageLocation(uri, Regions.fromName(s3.regionName))
 
     fun upload(

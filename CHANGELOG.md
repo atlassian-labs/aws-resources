@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.3.2
 
+### Fixed
+- Fix escape special characters when creating a URI for `Storage`. Resolve [JPERF-358].
+
+[JPERF-358]: https://ecosystem.atlassian.net/browse/JPERF-358
+
 ## [1.3.2] - 2019-01-10
 [1.3.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.3.2%0Drelease-1.3.1
 
