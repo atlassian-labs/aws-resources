@@ -14,7 +14,7 @@ class AwsIT {
     @Test
     fun shouldCleanUpAfterProvisioning() {
         val aws = IntegrationTestRuntime.aws
-        val lifespan = Duration.ofSeconds(1)
+        val lifespan = Duration.ofMinutes(5)
         val stackFormula = StackFormula(
             investment = Investment(
                 useCase = "Test housekeeping",
@@ -26,8 +26,7 @@ class AwsIT {
         )
 
         val stack = stackFormula.provision()
-        Thread.sleep(lifespan.toMillis())
-        aws.cleanLeftovers()
+        stack.release().get()
 
         aws
             .listDisposableStacks()
