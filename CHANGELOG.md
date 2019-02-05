@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.3.3
 
+### Fixed
+- Retry S3 object downloads. Fix [JPERF-382].
+
+[JPERF-382]: https://ecosystem.atlassian.net/browse/JPERF-358
+
 ## [1.3.3] - 2019-01-16
 [1.3.3]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.3.3%0Drelease-1.3.2
 

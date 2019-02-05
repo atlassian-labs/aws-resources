@@ -5,12 +5,15 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ListObjectsV2Request
 import com.amazonaws.services.s3.model.ListObjectsV2Result
 import com.atlassian.performance.tools.io.api.copy
+import com.atlassian.performance.tools.jvmtasks.api.ExponentialBackoff
+import com.atlassian.performance.tools.jvmtasks.api.IdempotentAction
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
 
 data class Storage(
     private val s3: AmazonS3,
@@ -92,13 +95,31 @@ data class Storage(
         listing
             .objectSummaries
             .map { it.key }
-            .forEach { key ->
-                val path = key.removePrefix("$prefix/")
-                val leafTarget = rootTarget.resolve(path)
-                logger.debug("Downloading $bucketName/$key into $leafTarget")
-                s3.getObject(bucketName, key).objectContent.use { stream ->
-                    stream.copy(leafTarget)
+            .map {
+                IdempotentAction("download $it") {
+                    downloadObject(it, rootTarget)
                 }
             }
+            .forEach {
+                it.retry(
+                    maxAttempts = 2,
+                    backoff = ExponentialBackoff(
+                        baseBackoff = Duration.ofSeconds(5),
+                        exponent = 2.0
+                    )
+                )
+            }
+    }
+
+    private fun downloadObject(
+        key: String,
+        rootTarget: Path
+    ) {
+        val path = key.removePrefix("$prefix/")
+        val leafTarget = rootTarget.resolve(path)
+        logger.debug("Downloading $bucketName/$key into $leafTarget")
+        s3.getObject(bucketName, key).objectContent.use { stream ->
+            stream.copy(leafTarget)
+        }
     }
 }
