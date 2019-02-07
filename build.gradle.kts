@@ -33,7 +33,7 @@ dependencies {
     api("com.atlassian.performance.tools:ssh:[1.0.0,3.0.0)")
     api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
     implementation("com.atlassian.performance.tools:concurrency:[1.0.0,2.0.0)")
-    implementation("com.atlassian.performance.tools:io:[1.0.0,2.0.0)")
+    implementation("com.atlassian.performance.tools:io:[1.2.0,2.0.0)")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
     implementation("commons-codec:commons-codec:1.10")
     aws(
