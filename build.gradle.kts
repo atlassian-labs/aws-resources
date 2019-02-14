@@ -39,6 +39,7 @@ dependencies {
     aws(
         "ec2",
         "s3",
+        "rds",
         "iam",
         "sts",
         "cloudformation",

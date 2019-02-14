@@ -19,6 +19,8 @@ import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClientBuilder
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder
+import com.amazonaws.services.rds.AmazonRDS
+import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.atlassian.performance.tools.aws.Cloudformation
@@ -48,6 +50,10 @@ class Aws private constructor(
         .build()
     val s3: AmazonS3 = AmazonS3ClientBuilder.standard()
         .withRegion(region)
+        .withCredentials(credentialsProvider)
+        .build()
+    val rds: AmazonRDS = AmazonRDSClientBuilder.standard()
+         .withRegion(region)
         .withCredentials(credentialsProvider)
         .build()
     val cloudformation: AmazonCloudFormation = AmazonCloudFormationClientBuilder.standard()
