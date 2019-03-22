@@ -11,11 +11,15 @@ object FakeAws {
     fun awsForUnitTests(
         credentialsProvider: AWSCredentialsProvider = FakeAwsCredentialsProvider(),
         batchingCloudformationRefreshPeriod: Duration = Duration.ofSeconds(20)
-    ) = Aws(
-        region = Regions.DEFAULT_REGION,
-        credentialsProvider = credentialsProvider,
-        regionsWithHousekeeping = listOf(Regions.DEFAULT_REGION),
-        capacity = TextCapacityMediator(Regions.DEFAULT_REGION),
+    ) = Aws.Builder(
+        region = Regions.DEFAULT_REGION
+    ).credentialsProvider(
+        credentialsProvider
+    ).regionsWithHousekeeping(regionsWithHousekeeping = listOf(Regions.DEFAULT_REGION)).capacity(
+        capacity = TextCapacityMediator(
+            Regions.DEFAULT_REGION
+        )
+    ).batchingCloudformationRefreshPeriod(
         batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod
-    )
+    ).build()
 }

@@ -2,6 +2,7 @@ package com.atlassian.performance.tools.aws.api
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.regions.Regions
 import com.amazonaws.retry.PredefinedBackoffStrategies
 import com.amazonaws.retry.PredefinedRetryPolicies
@@ -34,6 +35,7 @@ import org.apache.logging.log4j.Logger
 import java.time.Duration
 import java.time.Instant.now
 import java.util.concurrent.CompletableFuture
+import java.util.function.Predicate
 
 class Aws private constructor(
     val region: Regions,
@@ -41,7 +43,8 @@ class Aws private constructor(
     capacity: CapacityMediator,
     batchingCloudformationRefreshPeriod: Duration,
     regionsWithHousekeeping: List<Regions>,
-    requireHousekeeping: Boolean
+    requireHousekeeping: Boolean,
+    availabilityZoneFilter: (AvailabilityZone) -> Boolean
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -142,6 +145,7 @@ class Aws private constructor(
             .describeAvailabilityZones()
             .availabilityZones
             .filter { AvailabilityZoneState.fromValue(it.state) == AvailabilityZoneState.Available }
+            .filter(availabilityZoneFilter)
     }
 
     init {
@@ -189,6 +193,17 @@ class Aws private constructor(
      * @param [batchingCloudformationRefreshPeriod] Gives time for the batch requests to accumulate single requests.
      *                                              Trades off between AWS throttling and Cloudformation latency.
      */
+    @Deprecated(
+        message = "Use Builder instead.",
+        replaceWith = ReplaceWith(
+            expression = "Aws.Builder(region = region)" +
+                ".credentialsProvider(credentialsProvider)" +
+                ".regionsWithHousekeeping(regionsWithHousekeeping)" +
+                ".capacity(capacity)" +
+                ".batchingCloudformationRefreshPeriod(batchingCloudformationRefreshPeriod)" +
+                ".build()"
+        )
+    )
     constructor(
         credentialsProvider: AWSCredentialsProvider,
         region: Regions,
@@ -201,13 +216,21 @@ class Aws private constructor(
         capacity = capacity,
         batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
         regionsWithHousekeeping = regionsWithHousekeeping,
-        requireHousekeeping = true
+        requireHousekeeping = true,
+        availabilityZoneFilter = { true }
     )
 
     @Deprecated(
-        message = "Use the 5-argument constructor. " +
+        message = "Use Builder instead. " +
             "This constructor is unsafe, because it doesn't fail-fast for missing AWS housekeeping declarations. " +
-            "It's left here only for compatibility. Move away from it as fast as possible."
+            "It's left here only for compatibility. Move away from it as fast as possible.",
+        replaceWith = ReplaceWith(
+            expression = "Aws.Builder(region = region)" +
+                ".credentialsProvider(credentialsProvider)" +
+                ".capacity(capacity)" +
+                ".batchingCloudformationRefreshPeriod(batchingCloudformationRefreshPeriod)" +
+                ".build()"
+        )
     )
     @JvmOverloads
     constructor(
@@ -221,7 +244,8 @@ class Aws private constructor(
         capacity = capacity,
         batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
         regionsWithHousekeeping = emptyList(),
-        requireHousekeeping = false
+        requireHousekeeping = false,
+        availabilityZoneFilter = { true }
     )
 
     fun jiraStorage(
@@ -289,4 +313,56 @@ class Aws private constructor(
     }
 
     private fun Regions.describe(): String = "$name ($description)"
+
+    /**
+     * @param [region] AWS region to allocate all resources in. Note that many kinds of resources are region-specific.
+     */
+    class Builder constructor(
+        private val region: Regions
+    ) {
+        private var credentialsProvider: AWSCredentialsProvider = DefaultAWSCredentialsProviderChain()
+        private var regionsWithHousekeeping: List<Regions> = emptyList()
+        private var capacity: CapacityMediator = TextCapacityMediator(region)
+        private var batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
+        private var availabilityZoneFilter: Predicate<AvailabilityZone> = Predicate { true }
+
+        /**
+         * @param [credentialsProvider] A way to authenticate with your AWS account. This account will be used and billed.
+         */
+        fun credentialsProvider(credentialsProvider: AWSCredentialsProvider): Builder =
+            apply { this.credentialsProvider = credentialsProvider }
+        /**
+         * @param [regionsWithHousekeeping] Declaration, that the caller took care of AWS housekeeping in these regions.
+         */
+        fun regionsWithHousekeeping(regionsWithHousekeeping: List<Regions>): Builder =
+            apply { this.regionsWithHousekeeping = regionsWithHousekeeping }
+
+        /**
+         * @param [capacity] A way to manage capacity if you use more AWS resources than usual.
+         */
+        fun capacity(capacity: CapacityMediator): Builder = apply { this.capacity = capacity }
+
+        /**
+         * @param [batchingCloudformationRefreshPeriod] Gives time for the batch requests to accumulate single requests.
+         *                                              Trades off between AWS throttling and Cloudformation latency.
+         */
+        fun batchingCloudformationRefreshPeriod(batchingCloudformationRefreshPeriod: Duration): Builder =
+            apply { this.batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod }
+
+        /**
+         * @param [availabilityZoneFilter] A way to choose specific AWS availability zones.
+         */
+        fun availabilityZoneFilter(availabilityZoneFilter: Predicate<AvailabilityZone>): Builder =
+            apply { this.availabilityZoneFilter = availabilityZoneFilter }
+
+        fun build(): Aws = Aws(
+            region = region,
+            credentialsProvider = credentialsProvider,
+            capacity = capacity,
+            batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
+            regionsWithHousekeeping = regionsWithHousekeeping,
+            requireHousekeeping = true,
+            availabilityZoneFilter = { availabilityZoneFilter.test(it) }
+        )
+    }
 }

@@ -23,6 +23,15 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.3.4
 
+### Added
+- A Builder for `Aws`.
+- Allow avoiding problematic availability zones. Fix [JPERF-427].
+
+### Deprecated
+- Deprecate last `Aws` constructor in favour of `Aws.Builder`.
+
+[JPERF-427]: https://ecosystem.atlassian.net/browse/JPERF-427
+
 ## [1.3.4] - 2019-02-07
 [1.3.4]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.3.4%0Drelease-1.3.3
 
