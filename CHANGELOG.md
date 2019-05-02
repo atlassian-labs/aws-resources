@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.4.0
 
+### Added
+- Allow customisation of resources' release timeout. Resolves [JPERF-419].
+
+[JPERF-419]: https://ecosystem.atlassian.net/browse/JPERF-419
+
 ## [1.4.0] - 2019-03-22
 [1.4.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.4.0%0Drelease-1.3.4
 

@@ -266,12 +266,33 @@ class Aws private constructor(
         datasetName: String
     ) = customDatasetStorage.findStorage("DatasetBucket", datasetName)
 
+    /**
+     * Releases all the expired AWS resources allocated by JPT.
+     */
     fun cleanLeftovers() {
+        cleanLeftovers(
+            stacksReleaseTimeout = Duration.ofMinutes(5),
+            ec2ReleaseTimeout = Duration.ofMinutes(2)
+        )
+    }
+
+    /**
+     * Releases all the expired AWS resources allocated by JPT.
+     *
+     * @param stacksReleaseTimeout timeout for releasing expired cloudformation stacks.
+     * @param ec2ReleaseTimeout timeout for releasing expired ec2 instances.
+     *
+     * @since 1.5.0
+     */
+    fun cleanLeftovers(
+        stacksReleaseTimeout : Duration,
+        ec2ReleaseTimeout: Duration
+    ) {
         val stacks = Cloudformation(this, cloudformation).listExpiredStacks()
-        waitUntilReleased(stacks, Duration.ofMinutes(5))
+        waitUntilReleased(stacks, stacksReleaseTimeout)
 
         val instances = Ec2(ec2).listExpiredInstances()
-        waitUntilReleased(instances, timeout = Duration.ofMinutes(2))
+        waitUntilReleased(instances, ec2ReleaseTimeout)
 
         val keys = ec2.describeKeyPairs().keyPairs.map { key ->
             RemoteSshKey(SshKeyName(key.keyName), ec2)
