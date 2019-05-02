@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.4.0
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.5.0
+
+## [1.5.0] - 2019-05-02
+[1.5.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.5.0%0Drelease-1.4.0
 
 ### Added
 - Allow customisation of resources' release timeout. Resolves [JPERF-419].
