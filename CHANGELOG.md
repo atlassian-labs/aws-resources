@@ -22,6 +22,8 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.5.0
+### Added
+- instance initiatied shutdown on instances started with AwaitingEc2 will now terminate the EC2 instance instead of stopping it
 
 ## [1.5.0] - 2019-05-02
 [1.5.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.5.0%0Drelease-1.4.0

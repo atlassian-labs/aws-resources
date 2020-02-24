@@ -3,7 +3,8 @@ package com.atlassian.performance.tools.aws.api
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.*
 import com.amazonaws.waiters.WaiterParameters
-import com.atlassian.performance.tools.aws.*
+import com.atlassian.performance.tools.aws.Ec2Instance
+import com.atlassian.performance.tools.aws.Ec2SshAccess
 import com.atlassian.performance.tools.ssh.api.Ssh
 import com.atlassian.performance.tools.ssh.api.SshHost
 import org.apache.logging.log4j.LogManager
@@ -11,6 +12,9 @@ import org.apache.logging.log4j.Logger
 import java.time.Duration
 import java.time.Instant.now
 
+/**
+ * Instances started with this class will by default terminate after an instance initiated shutdown.
+ */
 class AwaitingEc2(
     private val ec2: AmazonEC2,
     private val terminationBatchingEc2: TerminationBatchingEc2,
@@ -57,6 +61,7 @@ class AwaitingEc2(
             .withMinCount(1)
             .withMaxCount(1)
             .withImageId(defaultAmi)
+            .withInstanceInitiatedShutdownBehavior(ShutdownBehavior.Terminate)
             .withKeyName(key.remote.name)
             .withSecurityGroupIds(sshAccess.groupId)
             .withTagSpecifications(
