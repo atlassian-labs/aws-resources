@@ -35,7 +35,7 @@ dependencies {
     implementation("com.atlassian.performance.tools:concurrency:[1.0.0,2.0.0)")
     implementation("com.atlassian.performance.tools:io:[1.2.0,2.0.0)")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
-    implementation("commons-codec:commons-codec:1.10")
+    implementation("commons-codec:commons-codec:1.11")
     aws(
         "ec2",
         "s3",
@@ -58,7 +58,7 @@ fun aws(
     vararg modules: String
 ): List<String> = modules
     .map { module ->
-        "com.amazonaws:aws-java-sdk-$module:1.11.424"
+        "com.amazonaws:aws-java-sdk-$module:1.11.817"
     }
     .plus(log4j("jcl"))
     .plus(jaxb())

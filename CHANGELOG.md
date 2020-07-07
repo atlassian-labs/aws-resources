@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.6.0
 
+### Added
+- Upgraded AWS SDK to 1.11.817
+
 ## [1.6.0] - 2020-03-25
 [1.6.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.6.0%0Drelease-1.5.0
 
