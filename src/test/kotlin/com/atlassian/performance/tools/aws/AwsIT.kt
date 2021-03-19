@@ -7,7 +7,9 @@ import com.atlassian.performance.tools.io.api.readResourceText
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import java.nio.file.Files
 import java.time.Duration
+import java.util.*
 
 class AwsIT {
 
@@ -39,5 +41,18 @@ class AwsIT {
     @Category(CleanLeftovers::class)
     fun shouldCleanLeftovers() {
         IntegrationTestRuntime.aws.cleanLeftovers()
+    }
+
+    @Test
+    fun shouldTransferViaStorage() {
+        val textFile = Files.createTempFile("AwsIT-", ".txt")
+            .toFile()
+            .also { it.writeText("beam me up") }
+
+        val storage = IntegrationTestRuntime.aws.resultsStorage("aws-resources-test-${UUID.randomUUID()}")
+        storage.upload(textFile)
+        val downloaded = storage.download(Files.createTempDirectory("AwsIT-"))
+
+        assertThat(downloaded.resolve(textFile.name)).hasContent("beam me up")
     }
 }
