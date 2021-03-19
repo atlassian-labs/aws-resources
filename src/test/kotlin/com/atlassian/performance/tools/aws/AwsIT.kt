@@ -87,5 +87,25 @@ class AwsIT {
         sshKey.remote.release().get()
     }
 
-    private fun RunInstancesRequest.withAwsCli() = withImageId("ami-0bc20ae5d1b732be4")
+
+    private fun RunInstancesRequest.withAwsCli(): RunInstancesRequest {
+        return withImageId("ami-0bc20ae5d1b732be4")
+            .withFastAmazonLinuxSsh()
+    }
+
+    /**
+     * [https://aws.amazon.com/amazon-linux-ami/faqs/](Amazon Linux FAQ) recognizes slow SSH startups by default:
+     * >  On first boot, the Amazon Linux AMI installs from the package
+     * repositories any user space security updates that are rated critical or
+     * important, and it does so before services, such as SSH, start.
+     */
+    private fun RunInstancesRequest.withFastAmazonLinuxSsh() = withUserData(
+        """
+        #cloud-config
+        repo_upgrade: none
+        """
+            .trimIndent()
+            .toByteArray()
+            .let { Base64.getEncoder().encodeToString(it) }
+    )
 }
