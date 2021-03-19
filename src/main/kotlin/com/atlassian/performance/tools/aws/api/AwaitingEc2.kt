@@ -33,7 +33,8 @@ class AwaitingEc2(
         customizeLaunch: (RunInstancesRequest) -> RunInstancesRequest
     ): SshInstance {
         val sshAccess = Ec2SshAccess(ec2, this).getSecurityGroup(investment, vpcId)
-        val startingInstance = startInstance(customizeLaunch(launchDefaults(key, investment, sshAccess)))
+        val launchRequest = customizeLaunch(launchDefaults(key, investment, sshAccess))
+        val startingInstance = startInstance(launchRequest)
         ec2.waiters().instanceRunning().run(WaiterParameters(startingInstance))
         val startedInstance = ec2
             .describeInstances(startingInstance)
@@ -42,7 +43,7 @@ class AwaitingEc2(
             .single()
         return SshInstance(
             ssh = Ssh(
-                host = SshHost(startedInstance.publicIpAddress, "ubuntu", key.file.path),
+                host = SshHost(startedInstance.publicIpAddress, launchRequest.additionalInfo, key.file.path),
                 connectivityPatience = 4
             ),
             resource = DependentResources(
@@ -62,6 +63,7 @@ class AwaitingEc2(
             .withMaxCount(1)
             .withInstanceType(InstanceType.T3Nano)
             .withImageId(defaultAmi)
+            .withAdditionalInfo("ubuntu")
             .withInstanceInitiatedShutdownBehavior(ShutdownBehavior.Terminate)
             .withKeyName(key.remote.name)
             .withSecurityGroupIds(sshAccess.groupId)

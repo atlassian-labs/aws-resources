@@ -90,6 +90,7 @@ class AwsIT {
 
     private fun RunInstancesRequest.withAwsCli(): RunInstancesRequest {
         return withImageId("ami-0bc20ae5d1b732be4")
+            .withAdditionalInfo("ec2-user")
             .withFastAmazonLinuxSsh()
     }
 
