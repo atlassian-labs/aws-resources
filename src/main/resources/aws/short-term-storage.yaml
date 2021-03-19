@@ -4,8 +4,6 @@ Resources:
   StorageRole:
     Type: AWS::IAM::Role
     Properties:
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -17,6 +15,16 @@ Resources:
           Action:
             - sts:AssumeRole
       Policies:
+        - PolicyName: ShortTermStoragePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: '*'
         - PolicyName: LaaS-write-streams
           PolicyDocument:
             Version: 2012-10-17
