@@ -2,6 +2,7 @@ package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.cloudformation.model.StackStatus.*
 import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification
+import com.amazonaws.services.ec2.model.RunInstancesRequest
 import com.atlassian.performance.tools.aws.IntegrationTestRuntime.aws
 import com.atlassian.performance.tools.aws.api.Investment
 import com.atlassian.performance.tools.aws.api.SshKeyFormula
@@ -68,9 +69,9 @@ class AwsIT {
         val sshInstance = aws
             .awaitingEc2
             .allocateInstance(investment, sshKey, vpcId = null) { launch ->
-                launch.withIamInstanceProfile(
-                    IamInstanceProfileSpecification().withName(aws.shortTermStorageAccess())
-                )
+                launch
+                    .withIamInstanceProfile(IamInstanceProfileSpecification().withName(aws.shortTermStorageAccess()))
+                    .withAwsCli()
             }
         val storage = aws.virtualUsersStorage(awsPrefix + UUID.randomUUID())
         val location = storage.location
@@ -85,4 +86,6 @@ class AwsIT {
         sshInstance.resource.release().get()
         sshKey.remote.release().get()
     }
+
+    private fun RunInstancesRequest.withAwsCli() = withImageId("ami-0bc20ae5d1b732be4")
 }
