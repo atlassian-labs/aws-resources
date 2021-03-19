@@ -60,6 +60,7 @@ class AwaitingEc2(
         return RunInstancesRequest()
             .withMinCount(1)
             .withMaxCount(1)
+            .withInstanceType(InstanceType.T3Nano)
             .withImageId(defaultAmi)
             .withInstanceInitiatedShutdownBehavior(ShutdownBehavior.Terminate)
             .withKeyName(key.remote.name)

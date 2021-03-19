@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.6.1
 
+### Fixed
+- Pick a default instance type in `AwaitingEc2`.
+
 ## [1.6.1] - 2020-07-08
 [1.6.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.6.1%0Drelease-1.6.0
 

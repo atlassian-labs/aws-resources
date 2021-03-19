@@ -76,12 +76,12 @@ class AwsIT {
         val location = storage.location
 
         sshInstance.ssh.newConnection().use { ssh ->
-            ssh.execute("echo 'shoot for the moon' > message.txt")
-            ssh.execute("aws s3 sync --region=${location.regionName} message.txt ${location.uri}")
+            ssh.execute("echo 'shoot for the moon' > local.txt")
+            ssh.execute("aws s3 cp --region=${location.regionName} local.txt ${location.uri}/remote.txt")
         }
 
         val downloaded = storage.download(workspace)
-        assertThat(downloaded.resolve("message.txt")).hasContent("shoot for the moon")
+        assertThat(downloaded.resolve("remote.txt")).hasContent("shoot for the moon")
         sshInstance.resource.release().get()
         sshKey.remote.release().get()
     }
