@@ -17,17 +17,14 @@ Resources:
           Action:
             - sts:AssumeRole
       Policies:
-        -
-          PolicyName: LaaS-write-streams
+        - PolicyName: LaaS-write-streams
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              -
-                Effect: Allow
+              - Effect: Allow
                 Action: sts:AssumeRole
                 Resource: arn:aws:iam::915926889391:role/pipeline-prod-log-producer-545459181881
-              -
-                Effect: Allow
+              - Effect: Allow
                 Action: sts:AssumeRole
                 Resource: arn:aws:iam::684014341329:role/laas-prod-stream-writer
   AccessProfile:
