@@ -1,7 +1,10 @@
 package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.cloudformation.model.StackStatus.*
+import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification
+import com.atlassian.performance.tools.aws.IntegrationTestRuntime.aws
 import com.atlassian.performance.tools.aws.api.Investment
+import com.atlassian.performance.tools.aws.api.SshKeyFormula
 import com.atlassian.performance.tools.aws.api.StackFormula
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.assertj.core.api.Assertions.assertThat
@@ -13,16 +16,19 @@ import java.util.*
 
 class AwsIT {
 
+    private val investment = Investment(
+        useCase = "Test aws-resources library",
+        lifespan = Duration.ofMinutes(5),
+        disposable = true
+    )
+    private val workspace = Files.createTempDirectory("AwsIT-")
+    private val awsPrefix = "aws-resources-test-"
+
     @Test
     fun shouldCleanUpAfterProvisioning() {
-        val aws = IntegrationTestRuntime.aws
-        val lifespan = Duration.ofMinutes(5)
+        val aws = aws
         val stackFormula = StackFormula(
-            investment = Investment(
-                useCase = "Test housekeeping",
-                lifespan = lifespan,
-                disposable = true
-            ),
+            investment = investment,
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
             aws = aws
         )
@@ -40,7 +46,7 @@ class AwsIT {
     @Test
     @Category(CleanLeftovers::class)
     fun shouldCleanLeftovers() {
-        IntegrationTestRuntime.aws.cleanLeftovers()
+        aws.cleanLeftovers()
     }
 
     @Test
@@ -49,10 +55,34 @@ class AwsIT {
             .toFile()
             .also { it.writeText("beam me up") }
 
-        val storage = IntegrationTestRuntime.aws.resultsStorage("aws-resources-test-${UUID.randomUUID()}")
+        val storage = aws.resultsStorage("aws-resources-test-${UUID.randomUUID()}")
         storage.upload(textFile)
-        val downloaded = storage.download(Files.createTempDirectory("AwsIT-"))
+        val downloaded = storage.download(workspace)
 
         assertThat(downloaded.resolve(textFile.name)).hasContent("beam me up")
+    }
+
+    @Test
+    fun shouldTransferViaStorageOnEc2() {
+        val sshKey = SshKeyFormula(aws.ec2, workspace, awsPrefix, investment.lifespan).provision()
+        val sshInstance = aws
+            .awaitingEc2
+            .allocateInstance(investment, sshKey, vpcId = null) { launch ->
+                launch.withIamInstanceProfile(
+                    IamInstanceProfileSpecification().withName(aws.shortTermStorageAccess())
+                )
+            }
+        val storage = aws.virtualUsersStorage(awsPrefix + UUID.randomUUID())
+        val location = storage.location
+
+        sshInstance.ssh.newConnection().use { ssh ->
+            ssh.execute("echo 'shoot for the moon' > message.txt")
+            ssh.execute("aws s3 sync --region=${location.regionName} message.txt ${location.uri}")
+        }
+
+        val downloaded = storage.download(workspace)
+        assertThat(downloaded.resolve("message.txt")).hasContent("shoot for the moon")
+        sshInstance.resource.release().get()
+        sshKey.remote.release().get()
     }
 }
