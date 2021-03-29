@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.6.1
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.6.2
+
+## [1.6.2] - 2021-03-26
+[1.6.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.6.2%0Drelease-1.6.1
 
 ### Security
 - Apply good practices for S3 permissions. Fix [JPERF-728].
