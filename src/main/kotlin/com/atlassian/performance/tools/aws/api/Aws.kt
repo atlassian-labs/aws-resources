@@ -9,6 +9,7 @@ import com.amazonaws.retry.PredefinedRetryPolicies
 import com.amazonaws.retry.RetryPolicy
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder
+import com.amazonaws.services.cloudformation.model.Parameter
 import com.amazonaws.services.cloudformation.model.Stack
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
@@ -20,6 +21,7 @@ import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClientBuilder
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder
+import com.amazonaws.services.identitymanagement.model.AttachedPermissionsBoundary
 import com.amazonaws.services.rds.AmazonRDS
 import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.s3.AmazonS3
@@ -44,7 +46,8 @@ class Aws private constructor(
     batchingCloudformationRefreshPeriod: Duration,
     regionsWithHousekeeping: List<Regions>,
     requireHousekeeping: Boolean,
-    availabilityZoneFilter: (AvailabilityZone) -> Boolean
+    availabilityZoneFilter: (AvailabilityZone) -> Boolean,
+    permissionsBoundaryPolicy: String
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -106,10 +109,11 @@ class Aws private constructor(
                 disposable = false
             ),
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
+            parameters = listOf(Parameter().withParameterKey("PermissionBoundaryPolicyARN").withParameterValue(permissionsBoundaryPolicy)),
             aws = this
         ).provision()
     }
-
+    
     private val customDatasetStorage: ProvisionedStack by lazy {
         StackFormula(
             investment = Investment(
@@ -209,7 +213,8 @@ class Aws private constructor(
         region: Regions,
         regionsWithHousekeeping: List<Regions>,
         capacity: CapacityMediator,
-        batchingCloudformationRefreshPeriod: Duration
+        batchingCloudformationRefreshPeriod: Duration,
+        permissionsBoundaryPolicy: String
     ) : this(
         region = region,
         credentialsProvider = credentialsProvider,
@@ -217,7 +222,9 @@ class Aws private constructor(
         batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
         regionsWithHousekeeping = regionsWithHousekeeping,
         requireHousekeeping = true,
-        availabilityZoneFilter = { true }
+        availabilityZoneFilter = { true },
+        permissionsBoundaryPolicy = permissionsBoundaryPolicy
+
     )
 
     @Deprecated(
@@ -237,7 +244,9 @@ class Aws private constructor(
         region: Regions,
         credentialsProvider: AWSCredentialsProvider,
         capacity: CapacityMediator = TextCapacityMediator(region),
-        batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
+        batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1),
+        permissionsBoundaryPolicy: String
+
     ) : this(
         region = region,
         credentialsProvider = credentialsProvider,
@@ -245,7 +254,8 @@ class Aws private constructor(
         batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
         regionsWithHousekeeping = emptyList(),
         requireHousekeeping = false,
-        availabilityZoneFilter = { true }
+        availabilityZoneFilter = { true },
+        permissionsBoundaryPolicy = permissionsBoundaryPolicy
     )
 
     fun jiraStorage(
@@ -346,6 +356,7 @@ class Aws private constructor(
         private var capacity: CapacityMediator = TextCapacityMediator(region)
         private var batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
         private var availabilityZoneFilter: Predicate<AvailabilityZone> = Predicate { true }
+        private var permissionsBoundaryPolicy: String = ""
 
         /**
          * @param [credentialsProvider] A way to authenticate with your AWS account. This account will be used and billed.
@@ -376,6 +387,12 @@ class Aws private constructor(
         fun availabilityZoneFilter(availabilityZoneFilter: Predicate<AvailabilityZone>): Builder =
             apply { this.availabilityZoneFilter = availabilityZoneFilter }
 
+        /**
+         * @param [permissionsBoundaryPolicy] A way to choose specific AWS IAM permissionsBoundaryPolicy.
+         */
+        fun permissionsBoundaryPolicy(permissionsBoundaryPolicy: String): Builder =
+            apply { this.permissionsBoundaryPolicy = permissionsBoundaryPolicy }
+
         fun build(): Aws = Aws(
             region = region,
             credentialsProvider = credentialsProvider,
@@ -383,7 +400,8 @@ class Aws private constructor(
             batchingCloudformationRefreshPeriod = batchingCloudformationRefreshPeriod,
             regionsWithHousekeeping = regionsWithHousekeeping,
             requireHousekeeping = true,
-            availabilityZoneFilter = { availabilityZoneFilter.test(it) }
+            availabilityZoneFilter = { availabilityZoneFilter.test(it) },
+            permissionsBoundaryPolicy = permissionsBoundaryPolicy
         )
     }
 }
