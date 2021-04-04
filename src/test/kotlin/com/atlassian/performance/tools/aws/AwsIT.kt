@@ -31,7 +31,8 @@ class AwsIT {
         val stackFormula = StackFormula(
             investment = investment,
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
-            aws = aws
+            aws = aws,
+            parameters = listOf(Parameter().withParameterKey("PermissionBoundaryPolicyARN").withParameterValue("")),
         )
 
         val stack = stackFormula.provision()
