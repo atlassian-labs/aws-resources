@@ -5,8 +5,7 @@ Parameters:
     Description: The Permission Boundary Policy ARN
     Type: 'String'
 Conditions:
-  SetPermissionBoundary:
-    !Not [!Equals [!Ref PermissionBoundaryPolicyARN, ""]]
+  SetPermissionBoundary: !Not [!Equals [!Ref PermissionBoundaryPolicyARN, ""]]
 Resources:
   StorageRole:
     Type: AWS::IAM::Role
