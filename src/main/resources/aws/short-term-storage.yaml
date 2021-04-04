@@ -1,5 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Stores files needed during a test. IAM profiles provision slowly, so reusing them can be desirable.
+Parameters:
+  PermissionBoundaryPolicyARN:
+    Description: The Permission Boundary Policy ARN
+    Type: 'String'
 Conditions:
   SetPermissionBoundary:
     !Not [!Equals [!Ref PermissionBoundaryPolicyARN, ""]]
