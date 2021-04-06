@@ -1,6 +1,7 @@
 package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.cloudformation.model.StackStatus.*
+import com.amazonaws.services.cloudformation.model.Parameter
 import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification
 import com.amazonaws.services.ec2.model.RunInstancesRequest
 import com.atlassian.performance.tools.aws.IntegrationTestRuntime.aws
@@ -31,7 +32,8 @@ class AwsIT {
         val stackFormula = StackFormula(
             investment = investment,
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
-            aws = aws
+            aws = aws,
+            parameters = listOf(Parameter().withParameterKey("PermissionBoundaryPolicyARN").withParameterValue(""))
         )
 
         val stack = stackFormula.provision()
