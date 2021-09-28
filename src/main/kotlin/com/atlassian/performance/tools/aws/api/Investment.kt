@@ -37,7 +37,7 @@ data class Investment(
         Tag("Name", "Jira Performance Tests"),
         Tag("service_name", useCase),
         Tag("business_unit", "Engineering-Server"),
-        Tag("resource_owner", "mkwidzinski")
+        Tag("resource_owner", "mzyromski")
     )
 
     /**
