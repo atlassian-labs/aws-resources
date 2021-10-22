@@ -140,6 +140,18 @@ class ProvisionedStack(
         .vpcs
         .single()
 
+    fun findSecurityGroup(
+        logicalId: String
+    ): SecurityGroup = aws
+        .ec2
+        .describeSecurityGroups(
+            DescribeSecurityGroupsRequest().withGroupIds(
+                findLogicalResource(resourceType = "AWS::EC2::SecurityGroup", logicalId = logicalId)
+            )
+        )
+        .securityGroups
+        .single()
+
     override fun isExpired(): Boolean {
         return expiry < now()
     }
