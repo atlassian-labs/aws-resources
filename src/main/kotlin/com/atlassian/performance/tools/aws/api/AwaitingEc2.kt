@@ -49,7 +49,8 @@ class AwaitingEc2(
             resource = DependentResources(
                 user = Ec2Instance(startedInstance, terminationBatchingEc2),
                 dependency = Ec2SecurityGroup(sshAccess, ec2)
-            )
+            ),
+            instance = startedInstance
         )
     }
 

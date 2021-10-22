@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.7.1
 
+### Added
+- `SshInstance` now contains AWS SDK `Instance` object, which includes i.a. information about private IP address. Unblocks [JPERF-730].
+
 ## [1.7.1] - 2021-09-28
 [1.7.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.7.1%0Drelease-1.7.0
 
