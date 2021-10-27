@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.7.1
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.8.0
+
+## [1.8.0] - 2021-10-27
+[1.8.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.8.0%0Drelease-1.7.1
 
 ### Added
 - `SshInstance` now contains AWS SDK `Instance` object, which includes i.a. information about private IP address. Unblocks [JPERF-730].
