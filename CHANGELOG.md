@@ -21,7 +21,13 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.8.0
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.8.1
+
+## [1.8.1] - 2022-02-16
+[1.8.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.8.1%0Drelease-1.8.0
+
+### Fixed
+- Changed resource_owner default label to point to current Atlassian JPT maintainer
 
 ## [1.8.0] - 2021-10-27
 [1.8.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.8.0%0Drelease-1.7.1
