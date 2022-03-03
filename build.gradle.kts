@@ -72,7 +72,7 @@ fun log4jCore(): List<String> = log4j(
 fun log4j(
     vararg modules: String
 ): List<String> = modules.map { module ->
-    "org.apache.logging.log4j:log4j-$module:2.10.0"
+    "org.apache.logging.log4j:log4j-$module:2.17.1"
 }
 
 fun jaxb(): List<String> = listOf(
