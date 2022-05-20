@@ -2,6 +2,7 @@ package com.atlassian.performance.tools.aws.api
 
 import com.amazonaws.services.cloudformation.model.*
 import com.amazonaws.services.cloudformation.model.StackStatus.*
+import com.atlassian.performance.tools.aws.PageScrollingStackEventsQuerier
 import org.apache.commons.codec.binary.Hex
 import org.apache.logging.log4j.LogManager
 import java.security.MessageDigest
@@ -109,29 +110,17 @@ data class StackFormula @JvmOverloads constructor(
                 else -> {
                     logger.error("Stack $stack failed: $status")
                     aws.stackNanny.takeCare(stackName)
-                    throwCreationFailureReason(stack)
+                    try {
+                        PageScrollingStackEventsQuerier.Builder(aws.cloudformation).build()
+                            .getEvents(stackId = stack.stackId).let { stackEvents ->
+                                throw Exception("Stack $stackName creation failed: $stack; Stack creation events: $stackEvents")
+                            }
+                    } catch (e: Exception) {
+                        throw Exception("Stack $stackName creation failed, but we failed to capture failure reason: $stack", e)
+                    }
                 }
             }
         }
         throw Exception("Stack $stackName provisioning timed out: $pollingTimeout")
-    }
-
-    private fun throwCreationFailureReason(stack: Stack) {
-        try {
-            val stackCreationReason = aws.cloudformation
-                .describeStackEvents(DescribeStackEventsRequest().withStackName(stack.stackId))
-                .stackEvents
-                .filter { ResourceStatus.fromValue(it.resourceStatus) == ResourceStatus.CREATE_FAILED }
-                .takeIf { it.isNotEmpty() }
-                ?.joinToString("; ") { "${it.logicalResourceId} failed to create because: ${it.resourceStatusReason}" }
-
-            if (stackCreationReason != null) {
-                throw Exception("Stack $stackName creation failed, because <<${stackCreationReason}>>: $stack")
-            } else {
-                throw Exception("Stack $stackName creation failed, but we didn't find any related event with status CREATE_FAILED: $stack")
-            }
-        } catch (e: Exception) {
-            throw Exception("Stack $stackName creation failed, but we failed to capture failure reason: $stack", e)
-        }
     }
 }
