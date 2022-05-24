@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.8.1
 
+### Security
+- Fix a security issue of log4j. Resolves [JPERF-771].
+
+[JPERF-771]: https://ecosystem.atlassian.net/browse/JPERF-771
+
 ### Fixed
 - Capture failure reason of stack creation as part of `StackFormula`. Resolves [JPERF-494].
 
