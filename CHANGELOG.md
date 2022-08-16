@@ -30,7 +30,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
  - Filter default AMI resolved by `Aws` (Ubuntu) by Canonical's owner ID. Resolves [JPERF-822].
  - Fail if more than one default AMI is resolved by `Aws`. 
 
+### Fixed
+ - Update default AMI resolved by `Aws` to one that is still available in all supported AWS regions. Resolves [JPERF-826].
+
 [JPERF-822]: https://ecosystem.atlassian.net/browse/JPERF-822
+[JPERF-826]: https://ecosystem.atlassian.net/browse/JPERF-826
 
 ## [1.8.2] - 2022-05-24
 [1.8.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.8.2%0Drelease-1.8.1
