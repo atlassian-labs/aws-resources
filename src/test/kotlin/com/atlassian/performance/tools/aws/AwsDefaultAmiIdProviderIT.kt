@@ -82,11 +82,13 @@ class AwsDefaultAmiIdProviderIT {
     private fun checkRegion(
         region: Regions
     ) {
-        val aws = Aws.Builder(region)
-            .regionsWithHousekeeping(listOf(region))
-            .build()
-
-        val imageId = aws.defaultAmi
+        val imageId = AwsDefaultAmiIdProvider(
+            Aws.Builder(region)
+                .regionsWithHousekeeping(listOf(region))
+                .build()
+                .ec2,
+            region = region
+        ).invoke()
 
         assertThat(imageId, not(isEmptyString()))
     }

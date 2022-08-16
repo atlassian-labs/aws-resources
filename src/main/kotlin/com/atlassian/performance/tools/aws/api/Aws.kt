@@ -15,21 +15,15 @@ import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.AvailabilityZoneState
-import com.amazonaws.services.ec2.model.DescribeImagesRequest
-import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClientBuilder
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder
-import com.amazonaws.services.identitymanagement.model.AttachedPermissionsBoundary
 import com.amazonaws.services.rds.AmazonRDS
 import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.atlassian.performance.tools.aws.Cloudformation
-import com.atlassian.performance.tools.aws.Ec2
-import com.atlassian.performance.tools.aws.InternalBatchingCloudformation
-import com.atlassian.performance.tools.aws.TokenScrollingEc2
+import com.atlassian.performance.tools.aws.*
 import com.atlassian.performance.tools.concurrency.api.finishBy
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.apache.logging.log4j.LogManager
@@ -127,20 +121,9 @@ class Aws private constructor(
         ).provision()
     }
 
-    private val amiName = "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180912"
+    @Suppress("MemberVisibilityCanBePrivate")
     val defaultAmi: String by lazy {
-        ec2
-            .describeImages(
-                DescribeImagesRequest().withFilters(
-                    Filter("name", listOf(amiName))
-                )
-            )
-            .images
-            .map { it.imageId }
-            .sorted()
-            .firstOrNull()
-            ?: throw Exception("Failed to find image $amiName in $region")
-
+        AwsDefaultAmiIdProvider(ec2, region).invoke()
     }
     val awaitingEc2: AwaitingEc2 by lazy { AwaitingEc2(ec2, terminationBatchingEc2, instanceNanny, defaultAmi) }
 

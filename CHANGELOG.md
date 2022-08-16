@@ -23,6 +23,15 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.8.2
 
+### Added
+ - Extract default AMI ID resolution logic from `Aws` to `CanonicalImageIdByNameResolver`, so that it's easy to select different AMI by lib consumers.
+
+### Security
+ - Filter default AMI resolved by `Aws` (Ubuntu) by Canonical's owner ID. Resolves [JPERF-822].
+ - Fail if more than one default AMI is resolved by `Aws`. 
+
+[JPERF-822]: https://ecosystem.atlassian.net/browse/JPERF-822
+
 ## [1.8.2] - 2022-05-24
 [1.8.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.8.2%0Drelease-1.8.1
 
