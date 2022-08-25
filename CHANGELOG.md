@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.8.2
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.9.0
+
+## [1.9.0] - 2022-08-22
+[1.9.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.9.0%0Drelease-1.8.2
 
 ### Added
  - Extract default AMI ID resolution logic from `Aws` to `CanonicalImageIdByNameResolver`, so that it's easy to select different AMI by lib consumers.
