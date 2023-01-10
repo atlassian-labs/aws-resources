@@ -1,8 +1,7 @@
 package com.atlassian.performance.tools.aws.api
 
 import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
+import com.amazonaws.auth.*
 import com.amazonaws.regions.Regions
 import com.amazonaws.retry.PredefinedBackoffStrategies
 import com.amazonaws.retry.PredefinedRetryPolicies
@@ -23,6 +22,7 @@ import com.amazonaws.services.rds.AmazonRDS
 import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
 import com.atlassian.performance.tools.aws.*
 import com.atlassian.performance.tools.concurrency.api.finishBy
 import com.atlassian.performance.tools.io.api.readResourceText
@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.time.Duration
 import java.time.Instant.now
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Predicate
 
@@ -53,7 +54,7 @@ class Aws private constructor(
         .withCredentials(credentialsProvider)
         .build()
     val rds: AmazonRDS = AmazonRDSClientBuilder.standard()
-         .withRegion(region)
+        .withRegion(region)
         .withCredentials(credentialsProvider)
         .build()
     val cloudformation: AmazonCloudFormation = AmazonCloudFormationClientBuilder.standard()
@@ -78,7 +79,9 @@ class Aws private constructor(
         .withCredentials(credentialsProvider)
         .build()
     private val scrollingCloudformation = ScrollingCloudformation(cloudformation)
-    internal val batchingCfn = InternalBatchingCloudformation(scrollingCloudformation, batchingCloudformationRefreshPeriod)
+    internal val batchingCfn =
+        InternalBatchingCloudformation(scrollingCloudformation, batchingCloudformationRefreshPeriod)
+
     @Deprecated(
         message = "Don't use batchingCloudformation directly. Use a StackFormula instead."
     )
@@ -103,11 +106,14 @@ class Aws private constructor(
                 disposable = false
             ),
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
-            parameters = listOf(Parameter().withParameterKey("PermissionBoundaryPolicyARN").withParameterValue(permissionsBoundaryPolicy)),
+            parameters = listOf(
+                Parameter().withParameterKey("PermissionBoundaryPolicyARN")
+                    .withParameterValue(permissionsBoundaryPolicy)
+            ),
             aws = this
         ).provision()
     }
-    
+
     private val customDatasetStorage: ProvisionedStack by lazy {
         StackFormula(
             investment = Investment(
@@ -278,7 +284,7 @@ class Aws private constructor(
      * @since 1.5.0
      */
     fun cleanLeftovers(
-        stacksReleaseTimeout : Duration,
+        stacksReleaseTimeout: Duration,
         ec2ReleaseTimeout: Duration
     ) {
         val stacks = Cloudformation(this, cloudformation).listExpiredStacks()
@@ -334,7 +340,16 @@ class Aws private constructor(
     class Builder constructor(
         private val region: Regions
     ) {
-        private var credentialsProvider: AWSCredentialsProvider = DefaultAWSCredentialsProviderChain()
+        private var credentialsProvider: AWSCredentialsProvider = AWSCredentialsProviderChain(
+            STSAssumeRoleWithWebIdentitySessionCredentialsProvider.Builder(
+                "arn:aws:iam::695067801333:role/jpt-bitbucket-pipelines",
+                UUID.randomUUID().toString(),
+                "web-identity-token"
+            ).withStsClient(
+                AWSSecurityTokenServiceClientBuilder.standard().withRegion(region).build()
+            ).build(),
+            DefaultAWSCredentialsProviderChain()
+        )
         private var regionsWithHousekeeping: List<Regions> = emptyList()
         private var capacity: CapacityMediator = TextCapacityMediator(region)
         private var batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
@@ -346,6 +361,7 @@ class Aws private constructor(
          */
         fun credentialsProvider(credentialsProvider: AWSCredentialsProvider): Builder =
             apply { this.credentialsProvider = credentialsProvider }
+
         /**
          * @param [regionsWithHousekeeping] Declaration, that the caller took care of AWS housekeeping in these regions.
          */

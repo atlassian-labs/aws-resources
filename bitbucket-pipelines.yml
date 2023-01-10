@@ -4,9 +4,11 @@ pipelines:
   default:
     - step:
         name: Build project
+        oidc: true
         caches:
           - gradle
         script:
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
           - bash ./gradlew build
         artifacts:
           - build/reports/**
@@ -14,9 +16,11 @@ pipelines:
     master:
       - step:
           name: Build project
+          oidc: true
           caches:
             - gradle
           script:
+            - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
             - bash ./gradlew build
           artifacts:
             - build/reports/**
@@ -34,5 +38,7 @@ pipelines:
     aws-housekeeping:
       - step:
           name: AWS housekeeping
+          oidc: true
           script:
+            - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
             - bash ./gradlew awsCleanLeftovers
