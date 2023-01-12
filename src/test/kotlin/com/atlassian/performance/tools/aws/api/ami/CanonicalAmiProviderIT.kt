@@ -1,4 +1,4 @@
-package com.atlassian.performance.tools.aws
+package com.atlassian.performance.tools.aws.api.ami
 
 import com.amazonaws.regions.Regions
 import com.amazonaws.regions.Regions.*
@@ -6,7 +6,7 @@ import com.atlassian.performance.tools.aws.api.Aws
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class AwsDefaultAmiIdProviderIT {
+class CanonicalAmiProviderIT {
     @Test
     fun worksInUsEast1() {
         checkRegion(US_EAST_1)
@@ -77,17 +77,14 @@ class AwsDefaultAmiIdProviderIT {
         checkRegion(AP_SOUTHEAST_2)
     }
 
-    private fun checkRegion(
-        region: Regions
-    ) {
-        val imageId = AwsDefaultAmiIdProvider(
-            Aws.Builder(region)
-                .regionsWithHousekeeping(listOf(region))
-                .build()
-                .ec2,
-            region = region
-        ).invoke()
+    private fun checkRegion(region: Regions) {
+        val aws = Aws.Builder(region)
+            .regionsWithHousekeeping(listOf(region))
+            .build()
+        val amiProvider = CanonicalAmiProvider.Builder().build()
 
-        assertThat(imageId).isNotEmpty()
+        val imageId = amiProvider.provideAmiId(aws)
+
+        assertThat(imageId).isNotEmpty
     }
 }

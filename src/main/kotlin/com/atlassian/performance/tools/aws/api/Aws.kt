@@ -24,6 +24,8 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
 import com.atlassian.performance.tools.aws.*
+import com.atlassian.performance.tools.aws.api.ami.AmiProvider
+import com.atlassian.performance.tools.aws.api.ami.CanonicalAmiProvider
 import com.atlassian.performance.tools.concurrency.api.finishBy
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.apache.logging.log4j.LogManager
@@ -42,7 +44,8 @@ class Aws private constructor(
     regionsWithHousekeeping: List<Regions>,
     requireHousekeeping: Boolean,
     availabilityZoneFilter: (AvailabilityZone) -> Boolean,
-    permissionsBoundaryPolicy: String
+    permissionsBoundaryPolicy: String,
+    amiProvider: AmiProvider,
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -129,7 +132,7 @@ class Aws private constructor(
 
     @Suppress("MemberVisibilityCanBePrivate")
     val defaultAmi: String by lazy {
-        AwsDefaultAmiIdProvider(ec2, region).invoke()
+        amiProvider.provideAmiId(this)
     }
     val awaitingEc2: AwaitingEc2 by lazy { AwaitingEc2(ec2, terminationBatchingEc2, instanceNanny, defaultAmi) }
 
@@ -203,7 +206,7 @@ class Aws private constructor(
         regionsWithHousekeeping: List<Regions>,
         capacity: CapacityMediator,
         batchingCloudformationRefreshPeriod: Duration,
-        permissionsBoundaryPolicy: String
+        permissionsBoundaryPolicy: String,
     ) : this(
         region = region,
         credentialsProvider = credentialsProvider,
@@ -212,8 +215,8 @@ class Aws private constructor(
         regionsWithHousekeeping = regionsWithHousekeeping,
         requireHousekeeping = true,
         availabilityZoneFilter = { true },
-        permissionsBoundaryPolicy = permissionsBoundaryPolicy
-
+        permissionsBoundaryPolicy = permissionsBoundaryPolicy,
+        amiProvider = CanonicalAmiProvider.Builder().build()
     )
 
     @Deprecated(
@@ -234,9 +237,9 @@ class Aws private constructor(
         credentialsProvider: AWSCredentialsProvider,
         capacity: CapacityMediator = TextCapacityMediator(region),
         batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1),
-        permissionsBoundaryPolicy: String
+        permissionsBoundaryPolicy: String,
 
-    ) : this(
+        ) : this(
         region = region,
         credentialsProvider = credentialsProvider,
         capacity = capacity,
@@ -244,25 +247,26 @@ class Aws private constructor(
         regionsWithHousekeeping = emptyList(),
         requireHousekeeping = false,
         availabilityZoneFilter = { true },
-        permissionsBoundaryPolicy = permissionsBoundaryPolicy
+        permissionsBoundaryPolicy = permissionsBoundaryPolicy,
+        amiProvider = CanonicalAmiProvider.Builder().build()
     )
 
     fun jiraStorage(
-        nonce: String
+        nonce: String,
     ) = shortTermStorage.findStorage("JiraBucket", nonce)
 
     fun virtualUsersStorage(
-        nonce: String
+        nonce: String,
     ) = shortTermStorage.findStorage("VirtualUsersBucket", nonce)
 
     fun resultsStorage(
-        nonce: String
+        nonce: String,
     ) = shortTermStorage.findStorage("ResultsBucket", nonce)
 
     fun shortTermStorageAccess() = shortTermStorage.findInstanceProfile("AccessProfile")
 
     fun customDatasetStorage(
-        datasetName: String
+        datasetName: String,
     ) = customDatasetStorage.findStorage("DatasetBucket", datasetName)
 
     /**
@@ -285,7 +289,7 @@ class Aws private constructor(
      */
     fun cleanLeftovers(
         stacksReleaseTimeout: Duration,
-        ec2ReleaseTimeout: Duration
+        ec2ReleaseTimeout: Duration,
     ) {
         val stacks = Cloudformation(this, cloudformation).listExpiredStacks()
         waitUntilReleased(stacks, stacksReleaseTimeout)
@@ -307,7 +311,7 @@ class Aws private constructor(
 
     private fun waitUntilReleased(
         resources: List<Resource>,
-        timeout: Duration = Duration.ofSeconds(15)
+        timeout: Duration = Duration.ofSeconds(15),
     ) {
         val deadline = now() + timeout
         resources
@@ -316,7 +320,7 @@ class Aws private constructor(
     }
 
     private fun startReleasing(
-        resource: Resource
+        resource: Resource,
     ): CompletableFuture<*> {
         if (!resource.isExpired()) {
             throw Exception("You can't release $resource. It hasn't expired.")
@@ -338,7 +342,7 @@ class Aws private constructor(
      * @param [region] AWS region to allocate all resources in. Note that many kinds of resources are region-specific.
      */
     class Builder constructor(
-        private val region: Regions
+        private val region: Regions,
     ) {
         private var credentialsProvider: AWSCredentialsProvider = AWSCredentialsProviderChain(
             STSAssumeRoleWithWebIdentitySessionCredentialsProvider.Builder(
@@ -355,6 +359,7 @@ class Aws private constructor(
         private var batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1)
         private var availabilityZoneFilter: Predicate<AvailabilityZone> = Predicate { true }
         private var permissionsBoundaryPolicy: String = ""
+        private var amiProvider: AmiProvider = CanonicalAmiProvider.Builder().build()
 
         /**
          * @param [credentialsProvider] A way to authenticate with your AWS account. This account will be used and billed.
@@ -392,6 +397,11 @@ class Aws private constructor(
         fun permissionsBoundaryPolicy(permissionsBoundaryPolicy: String): Builder =
             apply { this.permissionsBoundaryPolicy = permissionsBoundaryPolicy }
 
+        /**
+         * @param [amiProvider] A way to choose the default AMI.
+         */
+        fun amiProvider(amiProvider: AmiProvider): Builder = apply { this.amiProvider = amiProvider }
+
         fun build(): Aws = Aws(
             region = region,
             credentialsProvider = credentialsProvider,
@@ -400,7 +410,8 @@ class Aws private constructor(
             regionsWithHousekeeping = regionsWithHousekeeping,
             requireHousekeeping = true,
             availabilityZoneFilter = { availabilityZoneFilter.test(it) },
-            permissionsBoundaryPolicy = permissionsBoundaryPolicy
+            permissionsBoundaryPolicy = permissionsBoundaryPolicy,
+            amiProvider = amiProvider
         )
     }
 }
