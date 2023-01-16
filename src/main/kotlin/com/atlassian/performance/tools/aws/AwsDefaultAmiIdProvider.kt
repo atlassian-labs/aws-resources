@@ -12,5 +12,5 @@ internal class AwsDefaultAmiIdProvider(
         .region(region)
         .build()
 
-    override fun invoke() = imageIdByNameResolver(DefaultAmiNameRegistry.hvmSsdUbuntuXenial16_04Amd64Server20210928)
+    override fun invoke() = imageIdByNameResolver(DefaultAmiNameRegistry.hvmSsdUbuntuFocal20_04Amd64Server20220610)
 }

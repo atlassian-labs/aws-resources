@@ -23,6 +23,12 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.9.0
 
+### Fixed
+- Upgrade Ubuntu image to 20.04 LTS (Focal Fossa). Unblocks [JPERF-917]
+
+### Added
+- Extend `AWSCredentialsProviderChain` with `STSAssumeRoleWithWebIdentitySessionCredentialsProvider` to enable using OIDC token. Resolves [JPERF-916].
+
 ## [1.9.0] - 2022-08-22
 [1.9.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.9.0%0Drelease-1.8.2
 
