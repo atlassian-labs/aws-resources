@@ -12,6 +12,8 @@ import org.apache.logging.log4j.Logger
 import java.time.Duration
 import java.time.Instant.now
 
+internal typealias InstanceLaunchMod = (RunInstancesRequest) -> RunInstancesRequest
+
 /**
  * Instances started with this class will by default terminate after an instance initiated shutdown.
  */
@@ -19,7 +21,7 @@ class AwaitingEc2(
     private val ec2: AmazonEC2,
     private val terminationBatchingEc2: TerminationBatchingEc2,
     private val instanceNanny: InstanceNanny,
-    private val defaultAmi: String
+    private val defaultAmi: String,
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
@@ -30,7 +32,7 @@ class AwaitingEc2(
         investment: Investment,
         key: SshKey,
         vpcId: String?,
-        customizeLaunch: (RunInstancesRequest) -> RunInstancesRequest
+        customizeLaunch: InstanceLaunchMod,
     ): SshInstance {
         val sshAccess = Ec2SshAccess(ec2, this).getSecurityGroup(investment, vpcId)
         val launchRequest = customizeLaunch(launchDefaults(key, investment, sshAccess))
@@ -57,7 +59,7 @@ class AwaitingEc2(
     private fun launchDefaults(
         key: SshKey,
         investment: Investment,
-        sshAccess: SecurityGroup
+        sshAccess: SecurityGroup,
     ): RunInstancesRequest {
         return RunInstancesRequest()
             .withMinCount(1)
@@ -76,7 +78,7 @@ class AwaitingEc2(
     }
 
     private fun startInstance(
-        launch: RunInstancesRequest
+        launch: RunInstancesRequest,
     ): DescribeInstancesRequest {
         val response = try {
             ec2.runInstances(launch)
@@ -92,7 +94,7 @@ class AwaitingEc2(
 
     fun allocateSecurityGroup(
         investment: Investment,
-        request: CreateSecurityGroupRequest
+        request: CreateSecurityGroupRequest,
     ): SecurityGroup {
         val securityGroup = allocateSecurityGroup(request)
         ec2.createTags(
@@ -104,7 +106,7 @@ class AwaitingEc2(
     }
 
     private fun allocateSecurityGroup(
-        request: CreateSecurityGroupRequest
+        request: CreateSecurityGroupRequest,
     ): SecurityGroup {
         val securityGroup = ec2.createSecurityGroup(request)
         val refresh = DescribeSecurityGroupsRequest().withGroupIds(securityGroup.groupId)

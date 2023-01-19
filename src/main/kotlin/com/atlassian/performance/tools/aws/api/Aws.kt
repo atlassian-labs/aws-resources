@@ -98,7 +98,7 @@ class Aws private constructor(
         .build()
 
     val stackNanny = StackNanny(cloudformation, scrollingEc2, capacity)
-    private val instanceNanny = InstanceNanny(scrollingEc2, capacity)
+    internal val instanceNanny = InstanceNanny(scrollingEc2, capacity)
 
     private val shortTermStorage: ProvisionedStack by lazy {
         StackFormula(
