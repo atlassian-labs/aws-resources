@@ -22,7 +22,10 @@ import com.amazonaws.services.rds.AmazonRDS
 import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult
 import com.atlassian.performance.tools.aws.*
 import com.atlassian.performance.tools.aws.api.ami.AmiProvider
 import com.atlassian.performance.tools.aws.api.ami.CanonicalAmiProvider
@@ -80,6 +83,10 @@ class Aws private constructor(
         )
         .build()
     val iam: AmazonIdentityManagement = AmazonIdentityManagementClientBuilder.standard()
+        .withRegion(region)
+        .withCredentials(credentialsProvider)
+        .build()
+    val sts: AWSSecurityTokenService = AWSSecurityTokenServiceClientBuilder.standard()
         .withRegion(region)
         .withCredentials(credentialsProvider)
         .build()
@@ -146,6 +153,10 @@ class Aws private constructor(
             .availabilityZones
             .filter { AvailabilityZoneState.fromValue(it.state) == AvailabilityZoneState.Available }
             .filter(availabilityZoneFilter)
+    }
+
+    val callerIdentity: GetCallerIdentityResult by lazy {
+        sts.getCallerIdentity(GetCallerIdentityRequest())
     }
 
     init {
@@ -413,3 +424,4 @@ class Aws private constructor(
         )
     }
 }
+
