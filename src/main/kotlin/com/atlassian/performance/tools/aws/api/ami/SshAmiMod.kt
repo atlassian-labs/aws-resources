@@ -2,8 +2,12 @@ package com.atlassian.performance.tools.aws.api.ami
 
 import com.amazonaws.services.ec2.model.CreateImageRequest
 import com.amazonaws.services.ec2.model.CreateTagsRequest
+import com.amazonaws.services.ec2.model.DescribeImagesRequest
 import com.amazonaws.services.ec2.model.Tag
+import com.amazonaws.waiters.WaiterParameters
 import com.atlassian.performance.tools.aws.api.*
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.nio.file.Files.createTempDirectory
 import java.time.Duration
 import java.util.*
@@ -13,6 +17,8 @@ class SshAmiMod private constructor(
     private val amiProvider: AmiProvider,
     private val investment: Investment,
 ) : AmiProvider {
+
+    private val logger: Logger = LogManager.getLogger(this::class.java)
 
     override fun provideAmiId(aws: Aws): String {
         val baseAmiId = amiProvider.provideAmiId(aws)
@@ -25,6 +31,7 @@ class SshAmiMod private constructor(
             sshInstanceMod.modify(sshInstance)
             val moddedAmiId = createAmi(sshInstance, aws)
             tag(moddedAmiId, aws)
+            pollStatus(moddedAmiId, aws)
             return moddedAmiId
         } finally {
             sshInstance.resource.release().get()
@@ -52,6 +59,16 @@ class SshAmiMod private constructor(
             .withResources(amiId)
             .withTags(tags)
         aws.ec2.createTags(tagging)
+    }
+
+    private fun pollStatus(
+        amiId: String,
+        aws: Aws,
+    ) {
+        logger.info("Waiting for $amiId AMI to become available...")
+        val waiterParameters = WaiterParameters(DescribeImagesRequest().withImageIds(amiId))
+        aws.ec2.waiters().imageAvailable().run(waiterParameters)
+        logger.info("The $amiId AMI is available")
     }
 
     interface SshInstanceMod {
