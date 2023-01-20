@@ -15,6 +15,7 @@ import java.util.*
 class SshAmiMod private constructor(
     private val sshInstanceMod: SshInstanceMod,
     private val amiProvider: AmiProvider,
+    private val amiCache: AmiCache,
     private val investment: Investment,
 ) : AmiProvider {
 
@@ -22,20 +23,43 @@ class SshAmiMod private constructor(
 
     override fun provideAmiId(aws: Aws): String {
         val baseAmiId = amiProvider.provideAmiId(aws)
-        val keyPrefix = investment.reuseKey()
-        val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(keyPrefix), keyPrefix, investment.lifespan).provision()
-        // don't use aws.awaitingEc2, it would cause infinite recursion
-        val awaitingEc2 = AwaitingEc2(aws.ec2, aws.terminationBatchingEc2, aws.instanceNanny, baseAmiId)
-        val sshInstance = awaitingEc2.allocateInstance(investment, sshKey, vpcId = null) { launch -> launch }
+        val cacheKeyTags = cacheKeyTags(baseAmiId)
+        val cachedAmiId = amiCache.lookup(cacheKeyTags, aws)
+        return cachedAmiId ?: generateNewAmi(baseAmiId, cacheKeyTags, aws)
+    }
+
+    private fun cacheKeyTags(baseAmiId: String): Map<String, String> {
+        return sshInstanceMod.tag() + mapOf("base-ami-id" to baseAmiId)
+    }
+
+    private fun generateNewAmi(
+        baseAmiId: String,
+        tags: Map<String, String>,
+        aws: Aws,
+    ): String {
+        logger.info("Generating new AMI based on $baseAmiId...")
+        logger.debug("New AMI tags: $tags")
+        val sshInstance = allocateSshInstance(aws, baseAmiId)
         try {
             sshInstanceMod.modify(sshInstance)
             val moddedAmiId = createAmi(sshInstance, aws)
-            tag(moddedAmiId, aws)
+            tag(moddedAmiId, tags, aws)
             pollStatus(moddedAmiId, aws)
             return moddedAmiId
         } finally {
             sshInstance.resource.release().get()
         }
+    }
+
+    private fun allocateSshInstance(
+        aws: Aws,
+        amiId: String,
+    ): SshInstance {
+        val keyPrefix = investment.reuseKey()
+        val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(keyPrefix), keyPrefix, investment.lifespan).provision()
+        // don't use aws.awaitingEc2, it would cause infinite recursion
+        val awaitingEc2 = AwaitingEc2(aws.ec2, aws.terminationBatchingEc2, aws.instanceNanny, amiId)
+        return awaitingEc2.allocateInstance(investment, sshKey, vpcId = null) { launch -> launch }
     }
 
     private fun createAmi(
@@ -49,12 +73,10 @@ class SshAmiMod private constructor(
 
     private fun tag(
         amiId: String,
+        tagMap: Map<String, String>,
         aws: Aws,
     ) {
-        val tags = sshInstanceMod
-            .tag()
-            .entries
-            .map { (key, value) -> Tag(key, value) }
+        val tags = tagMap.entries.map { (key, value) -> Tag(key, value) }
         val tagging = CreateTagsRequest()
             .withResources(amiId)
             .withTags(tags)
@@ -83,21 +105,35 @@ class SshAmiMod private constructor(
         fun tag(): Map<String, String>
     }
 
+    interface AmiCache {
+
+        /**
+         * @return an existing AMI matching [tags] or null if none match
+         */
+        fun lookup(
+            tags: Map<String, String>,
+            aws: Aws,
+        ): String?
+    }
+
     class Builder(
         private var sshInstanceMod: SshInstanceMod,
     ) {
         private var amiProvider: AmiProvider = CanonicalAmiProvider.Builder().build()
+        private var amiCache: AmiCache = TiebreakingAmiCache.Builder().build()
         private var investment: Investment = Investment(
             useCase = "Modify an AMI image",
             lifespan = Duration.ofMinutes(20),
         )
 
         fun amiProvider(amiProvider: AmiProvider) = apply { this.amiProvider = amiProvider }
+        fun amiCache(amiCache: AmiCache) = apply { this.amiCache = amiCache }
         fun investment(investment: Investment) = apply { this.investment = investment }
 
         fun build(): SshAmiMod = SshAmiMod(
             sshInstanceMod = sshInstanceMod,
             amiProvider = amiProvider,
+            amiCache = amiCache,
             investment = investment,
         )
     }
