@@ -102,7 +102,10 @@ val testIntegration = task<Test>("testIntegration") {
         include("**/*IT.class")
         excludeTags("clean-leftovers")
     }
-    maxParallelForks = 4
+    // https://junit.org/junit5/docs/snapshot/user-guide/#writing-tests-parallel-execution
+    systemProperty("junit.jupiter.execution.parallel.enabled", true)
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+    systemProperty("junit.jupiter.execution.parallel.mode.classes.default", "concurrent")
 }
 
 tasks["check"].dependsOn(testIntegration)
