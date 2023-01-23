@@ -4,10 +4,11 @@ import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.atlassian.performance.tools.aws.FakeAws
 import com.atlassian.performance.tools.aws.FakeAwsCredentialsProvider
-import org.hamcrest.CoreMatchers.notNullValue
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import java.time.Duration
+import java.util.concurrent.TimeUnit.SECONDS
 
 class StackFormulaTest {
     private class MissingCredentialsProvider : AWSCredentialsProvider by FakeAwsCredentialsProvider() {
@@ -16,7 +17,8 @@ class StackFormulaTest {
         }
     }
 
-    @Test(timeout = 5000)
+    @Test
+    @Timeout(5, unit = SECONDS)
     fun shouldNotHang() {
         val formula = StackFormula(
             investment = Investment(
@@ -32,13 +34,8 @@ class StackFormulaTest {
             pollingTimeout = Duration.ofSeconds(2)
         )
 
-        val exception: Exception? = try {
+        assertThatThrownBy {
             formula.provision()
-            null
-        } catch (e: Exception) {
-            e
         }
-
-        assertThat("should fail for some reason", exception, notNullValue())
     }
 }

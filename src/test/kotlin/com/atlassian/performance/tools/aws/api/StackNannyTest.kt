@@ -12,9 +12,8 @@ import com.amazonaws.services.ec2.model.InstanceState
 import com.amazonaws.services.ec2.model.InstanceStateName
 import com.amazonaws.services.ec2.model.InstanceStateName.*
 import com.atlassian.performance.tools.aws.FakeCloudformation
-import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
 
 class StackNannyTest {
 
@@ -26,16 +25,11 @@ class StackNannyTest {
             capacity = TextCapacityMediator(Regions.US_EAST_1)
         )
 
-        var exception: Exception? = null
-        try {
+        assertThatThrownBy {
             nanny.takeCare("a-failed-stack")
-        } catch (e: Exception) {
-            exception = e
-        }
-
-        assertThat(
-            exception?.message,
-            equalTo("a-failed-stack stack failed due to a capacity problem: You either need to bump EC2 general instance limit to 20 in us-east-1 manually or inject SupportCapacityMediator into Aws for automatic management")
+        }.hasMessage(
+            "a-failed-stack stack failed due to a capacity problem: You either need to bump EC2 general instance limit" +
+                " to 20 in us-east-1 manually or inject SupportCapacityMediator into Aws for automatic management"
         )
     }
 }

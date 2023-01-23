@@ -4,22 +4,18 @@ import com.atlassian.performance.tools.aws.IntegrationTestRuntime
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Path
 import java.util.*
 
 class StorageIT {
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
-    @JvmField
-    @Rule
-    val folder = TemporaryFolder()
-
     @Test
-    fun shouldUploadAndDownload() {
+    fun shouldUploadAndDownload(@TempDir folder: Path) {
         val expectedFileName = "test-artifact.txt"
         val expectedFile = File(javaClass.getResource(expectedFileName).toURI())
         val expectedFileContent = expectedFile.readText()
@@ -28,14 +24,14 @@ class StorageIT {
         val storage = IntegrationTestRuntime.aws.resultsStorage(nonce)
 
         storage.upload(expectedFile)
-        val actualFile = storage.download(folder.newFolder().toPath()).resolve(expectedFileName).toFile()
+        val actualFile = storage.download(folder).resolve(expectedFileName).toFile()
         val actualFileContent = actualFile.readText()
 
         assertThat(actualFileContent).isEqualTo(expectedFileContent)
     }
 
     @Test
-    fun shouldUploadAndDownloadFileWithSpecialCharacters() {
+    fun shouldUploadAndDownloadFileWithSpecialCharacters(@TempDir folder: Path) {
         val expectedFileName = "test-artifact ::.txt"
         val expectedFile = File(javaClass.getResource(expectedFileName).toURI())
         val expectedFileContent = expectedFile.readText()
@@ -44,48 +40,44 @@ class StorageIT {
         val storage = IntegrationTestRuntime.aws.resultsStorage(nonce)
 
         storage.upload(expectedFile)
-        val actualFile = storage.download(folder.newFolder().toPath()).resolve(expectedFileName).toFile()
+        val actualFile = storage.download(folder).resolve(expectedFileName).toFile()
         val actualFileContent = actualFile.readText()
 
         assertThat(actualFileContent).isEqualTo(expectedFileContent)
     }
 
     @Test
-    fun shouldUploadAndDownloadSymmetrically() {
-        val upload = folder.newFolder("actualFolder")
+    fun shouldUploadAndDownloadSymmetrically(@TempDir upload: Path, @TempDir download: Path) {
         val subfolder = upload.resolve("subfolder")
-        subfolder.mkdir()
+        subfolder.toFile().mkdir()
         val file = subfolder.resolve("testfile.txt")
-        file.createNewFile()
+        file.toFile().createNewFile()
         val nonce = "StorageTest.shouldUploadAndDownloadSymmetrically.${UUID.randomUUID()}"
 
         val storage = IntegrationTestRuntime.aws.resultsStorage(nonce)
-        storage.upload(upload)
-        val download = storage.download(folder.newFolder("expectedFolder").toPath()).toFile()
+        storage.upload(upload.toFile())
+        storage.download(download).toFile()
 
         assertThat(download).exists()
-        assertThat(download.list()).isEqualTo(upload.list())
+        assertThat(download.toFile().list()).isEqualTo(upload.toFile().list())
     }
 
     @Test
-    fun shouldBeAbleToCacheResults() {
-        val upload = folder.newFolder("actualFolder")
-        val subfolder = upload.resolve("subfolder")
-        subfolder.mkdir()
-        val file = subfolder.resolve("testfile.txt")
+    fun shouldBeAbleToCacheResults(@TempDir upload: Path, @TempDir download: Path, @TempDir cache: Path) {
+        val file = upload.resolve("testfile.txt").toFile()
         file.createNewFile()
         val nonce = "StorageTest.shouldBeAbleToCacheResults.${UUID.randomUUID()}"
         val storage = IntegrationTestRuntime.aws.resultsStorage(nonce)
-        storage.upload(upload)
-        val download = storage.download(folder.newFolder("download").toPath()).toFile()
+        storage.upload(upload.toFile())
+        storage.download(download).toFile()
 
         val cacheNonce = "StorageTest.shouldBeAbleToCacheResults.${UUID.randomUUID()}"
-        val cache = IntegrationTestRuntime.aws.resultsStorage(cacheNonce)
-        cache.upload(download)
-        val cachedResults = cache.download(folder.newFolder("cache").toPath()).toFile()
+        val cacheStorage = IntegrationTestRuntime.aws.resultsStorage(cacheNonce)
+        cacheStorage.upload(download.toFile())
+        val cachedResults = cacheStorage.download(cache).toFile()
 
         assertThat(cachedResults).exists()
-        assertThat(cachedResults.list()).isEqualTo(upload.list())
-        assertThat(cachedResults.list()).isEqualTo(download.list())
+        assertThat(cachedResults.list()).isEqualTo(upload.toFile().list())
+        assertThat(cachedResults.list()).isEqualTo(download.toFile().list())
     }
 }

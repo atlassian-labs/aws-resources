@@ -3,10 +3,8 @@ package com.atlassian.performance.tools.aws
 import com.amazonaws.regions.Regions
 import com.amazonaws.regions.Regions.*
 import com.atlassian.performance.tools.aws.api.Aws
-import org.hamcrest.Matchers.isEmptyString
-import org.hamcrest.Matchers.not
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class AwsDefaultAmiIdProviderIT {
     @Test
@@ -90,6 +88,6 @@ class AwsDefaultAmiIdProviderIT {
             region = region
         ).invoke()
 
-        assertThat(imageId, not(isEmptyString()))
+        assertThat(imageId).isNotEmpty()
     }
 }

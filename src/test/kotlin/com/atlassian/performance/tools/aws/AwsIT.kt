@@ -10,8 +10,8 @@ import com.atlassian.performance.tools.aws.api.SshKeyFormula
 import com.atlassian.performance.tools.aws.api.StackFormula
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
-import org.junit.experimental.categories.Category
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.time.Duration
 import java.util.*
@@ -47,7 +47,7 @@ class AwsIT {
     }
 
     @Test
-    @Category(CleanLeftovers::class)
+    @Tag("clean-leftovers")
     fun shouldCleanLeftovers() {
         aws.cleanLeftovers()
     }

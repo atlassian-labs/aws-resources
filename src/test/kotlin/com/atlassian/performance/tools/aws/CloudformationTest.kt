@@ -5,10 +5,8 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import com.amazonaws.services.cloudformation.model.Stack
 import com.atlassian.performance.tools.aws.api.Tag
-import org.hamcrest.Matchers.empty
-import org.hamcrest.Matchers.hasSize
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.time.Duration.ofMinutes
 import java.time.Instant.now
 import java.util.*
@@ -25,7 +23,7 @@ class CloudformationTest {
 
         val expiredStacks = cloudformation.listExpiredStacks()
 
-        assertThat(expiredStacks, empty())
+        assertThat(expiredStacks).isEmpty()
     }
 
     @Test
@@ -44,7 +42,7 @@ class CloudformationTest {
 
         val expiredStacks = cloudformation.listExpiredStacks()
 
-        assertThat(expiredStacks, hasSize(1))
+        assertThat(expiredStacks).hasSize(1)
     }
 
     @Test
@@ -62,7 +60,7 @@ class CloudformationTest {
 
         val expiredStacks = cloudformation.listExpiredStacks()
 
-        assertThat(expiredStacks, empty())
+        assertThat(expiredStacks).isEmpty()
     }
 
     private class CloudformationMock(

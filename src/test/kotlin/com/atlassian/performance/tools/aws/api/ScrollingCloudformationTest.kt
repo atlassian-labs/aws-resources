@@ -6,24 +6,27 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import com.amazonaws.services.cloudformation.model.Stack
 import com.atlassian.performance.tools.aws.FakeCloudformation
 import com.atlassian.performance.tools.aws.FakeStacks
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.Matchers
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit.SECONDS
 
 class ScrollingCloudformationTest {
 
-    @Test(timeout = 2000)
+    @Test
+    @Timeout(2, unit = SECONDS)
     fun shouldMakeOneRequestForOneBatch() {
         shouldMakeOneRequestPerBatch(1)
     }
 
-    @Test(timeout = 2000)
+    @Test
+    @Timeout(2, unit = SECONDS)
     fun shouldMakeTwoRequestsForTwoBatches() {
         shouldMakeOneRequestPerBatch(2)
     }
 
-    @Test(timeout = 2000)
+    @Test
+    @Timeout(2, unit = SECONDS)
     fun shouldMakeThreeRequestsForThreeBatches() {
         shouldMakeOneRequestPerBatch(3)
     }
@@ -54,7 +57,7 @@ class ScrollingCloudformationTest {
         val scrolledStacks = mutableListOf<Stack>()
         scrollingCloudformation.scrollThroughStacks { scrolledStacks += it }
 
-        assertThat(scrolledStacks, Matchers.contains(stackWithLifespan))
+        assertThat(scrolledStacks).contains(stackWithLifespan)
     }
 
     private fun shouldMakeOneRequestPerBatch(
@@ -65,7 +68,7 @@ class ScrollingCloudformationTest {
 
         scrollingCloudformation.scrollThroughStacks {}
 
-        assertThat(cloudformation.countRequests(), equalTo(batchCount))
+        assertThat(cloudformation.countRequests()).isEqualTo(batchCount)
     }
 }
 

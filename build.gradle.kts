@@ -53,8 +53,7 @@ dependencies {
 
     log4jCore().forEach { implementation(it) }
 
-    testImplementation("junit:junit:4.12")
-    testImplementation("org.hamcrest:hamcrest-library:1.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testImplementation("org.assertj:assertj-core:3.11.1")
 }
 
@@ -86,22 +85,22 @@ fun jaxb(): List<String> = listOf(
 
 val cleanLeftovers = task<Test>("awsCleanLeftovers")
 cleanLeftovers.description = "Deletes every stack that exceeded its lifespan."
-cleanLeftovers.useJUnit {
-    includeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
+cleanLeftovers.useJUnitPlatform {
+    includeTags("clean-leftovers")
 }
 
 
 tasks.getByName("test", Test::class).apply {
-    useJUnit {
+    useJUnitPlatform {
         exclude("**/*IT.class")
-        excludeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
+        excludeTags("clean-leftovers")
     }
 }
 
 val testIntegration = task<Test>("testIntegration") {
-    useJUnit {
+    useJUnitPlatform {
         include("**/*IT.class")
-        excludeCategories("com.atlassian.performance.tools.aws.CleanLeftovers")
+        excludeTags("clean-leftovers")
     }
     maxParallelForks = 4
 }

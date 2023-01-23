@@ -1,10 +1,13 @@
 package com.atlassian.performance.tools.aws
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormation
-import com.amazonaws.services.cloudformation.model.*
-import org.hamcrest.Matchers.*
-import org.junit.Assert.assertThat
-import org.junit.Test
+import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult
+import com.amazonaws.services.cloudformation.model.StackEvent
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
 
 class PageScrollingStackEventsQuerierTest {
 
@@ -24,8 +27,8 @@ class PageScrollingStackEventsQuerierTest {
         val events = querier.getEvents("stackId")
 
         val requests = cloudformation.getRequests()
-        assertThat(requests, hasSize(1))
-        assertThat(events, hasSize(3))
+        assertThat(requests).hasSize(1)
+        assertThat(events).hasSize(3)
     }
 
     @Test
@@ -44,8 +47,8 @@ class PageScrollingStackEventsQuerierTest {
         val events = querier.getEvents("stackId")
 
         val requests = cloudformation.getRequests()
-        assertThat(events, hasSize(4))
-        assertThat(requests, hasSize(2))
+        assertThat(events).hasSize(4)
+        assertThat(requests).hasSize(2)
     }
 
     @Test
@@ -64,8 +67,8 @@ class PageScrollingStackEventsQuerierTest {
         val events = querier.getEvents("stackId")
 
         val requests = cloudformation.getRequests()
-        assertThat(events, hasSize(60))
-        assertThat(requests, hasSize(20))
+        assertThat(events).hasSize(60)
+        assertThat(requests).hasSize(20)
     }
 
     @Test
@@ -86,18 +89,19 @@ class PageScrollingStackEventsQuerierTest {
         val events = querier.getEvents("stackId")
 
         val requests = cloudformation.getRequests()
-        assertThat(events, hasSize(290))
-        assertThat(requests, hasSize(29))
+        assertThat(events).hasSize(290)
+        assertThat(requests).hasSize(29)
     }
 
-    @Test(expected = AmazonCloudFormationException::class)
+    @Test
     fun awsExceptionPassesThough() {
         val cloudformation = CloudFormationMock(
-            resultSequence = sequenceOf( { throw AmazonCloudFormationException("AWS exception") } )
+            resultSequence = sequenceOf({ throw AmazonCloudFormationException("AWS exception") })
         )
         val querier = PageScrollingStackEventsQuerier.Builder(cloudformation).build()
 
-        querier.getEvents("stackId")
+        assertThatThrownBy { querier.getEvents("stackId") }
+            .isInstanceOf(AmazonCloudFormationException::class.java)
     }
 
     private fun buildPageSequence(

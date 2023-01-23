@@ -1,6 +1,6 @@
 package com.atlassian.performance.tools.aws.api
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.Duration
 
 class SshKeyNameTest {

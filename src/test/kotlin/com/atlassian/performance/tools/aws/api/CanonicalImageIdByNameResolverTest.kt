@@ -8,9 +8,8 @@ import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.ec2.model.Image
 import com.atlassian.performance.tools.aws.CanonicalOwnerIdRegistry
 import com.atlassian.performance.tools.aws.FakeEc2
-import org.hamcrest.CoreMatchers.*
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class CanonicalImageIdByNameResolverTest {
     @Test
@@ -34,13 +33,10 @@ class CanonicalImageIdByNameResolverTest {
 
             resolver.invoke(queriedImageName)
 
-            assertThat(savedRequest, notNullValue())
-            assertThat(
-                savedRequest!!.filters,
-                hasItems(
-                    Filter("name", listOf(queriedImageName)),
-                    Filter("owner-id", listOf(CanonicalOwnerIdRegistry.byRegion[region]))
-                )
+            assertThat(savedRequest).isNotNull
+            assertThat(savedRequest!!.filters).contains(
+                Filter("name", listOf(queriedImageName)),
+                Filter("owner-id", listOf(CanonicalOwnerIdRegistry.byRegion[region]))
             )
         }
     }
@@ -64,13 +60,10 @@ class CanonicalImageIdByNameResolverTest {
 
         resolver.invoke(queriedImageName)
 
-        assertThat(savedRequest, notNullValue())
-        assertThat(
-            savedRequest!!.filters,
-            hasItems(
-                Filter("name", listOf(queriedImageName)),
-                Filter("owner-id", listOf(CanonicalOwnerIdRegistry.default))
-            )
+        assertThat(savedRequest).isNotNull
+        assertThat(savedRequest!!.filters).contains(
+            Filter("name", listOf(queriedImageName)),
+            Filter("owner-id", listOf(CanonicalOwnerIdRegistry.default))
         )
     }
 
@@ -89,7 +82,7 @@ class CanonicalImageIdByNameResolverTest {
 
         val result = resolver.invoke(queriedImageName)
 
-        assertThat(result, equalTo(expectedImageId))
+        assertThat(result).isEqualTo(expectedImageId)
     }
 
     @Test
@@ -110,7 +103,7 @@ class CanonicalImageIdByNameResolverTest {
             e
         }
 
-        assertThat(result, notNullValue())
+        assertThat(result).isNotNull()
     }
 
     @Test
@@ -135,6 +128,6 @@ class CanonicalImageIdByNameResolverTest {
             e
         }
 
-        assertThat(result, notNullValue())
+        assertThat(result).isNotNull()
     }
 }
