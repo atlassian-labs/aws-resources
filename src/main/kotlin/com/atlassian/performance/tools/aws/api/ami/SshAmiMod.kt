@@ -25,7 +25,12 @@ class SshAmiMod private constructor(
         val baseAmiId = amiProvider.provideAmiId(aws)
         val cacheKeyTags = cacheKeyTags(baseAmiId)
         val cachedAmiId = amiCache.lookup(cacheKeyTags, aws)
-        return cachedAmiId ?: generateNewAmi(baseAmiId, cacheKeyTags, aws)
+        return if (cachedAmiId != null) {
+            waitUntilAvailable(cachedAmiId, aws)
+            cachedAmiId
+        } else {
+            generateNewAmi(baseAmiId, cacheKeyTags, aws)
+        }
     }
 
     private fun cacheKeyTags(baseAmiId: String): Map<String, String> {
@@ -41,13 +46,17 @@ class SshAmiMod private constructor(
         logger.debug("New AMI tags: $tags")
         val sshInstance = allocateSshInstance(aws, baseAmiId)
         try {
+            logger.debug("Modifying $baseAmiId: $tags...")
             sshInstanceMod.modify(sshInstance)
-            val moddedAmiId = createAmi(sshInstance, aws)
-            tag(moddedAmiId, tags, aws)
-            pollStatus(moddedAmiId, aws)
-            return moddedAmiId
+            logger.debug("Modified $baseAmiId: $tags")
+            val newAmiId = createAmi(sshInstance, aws)
+            tag(newAmiId, tags, aws)
+            waitUntilAvailable(newAmiId, aws)
+            return newAmiId
         } finally {
+            logger.debug("Releasing resources used for modification of base AMI $baseAmiId: $tags...")
             sshInstance.resource.release().get()
+            logger.debug("Releasing resources used for modification of base AMI $baseAmiId: $tags")
         }
     }
 
@@ -83,7 +92,7 @@ class SshAmiMod private constructor(
         aws.ec2.createTags(tagging)
     }
 
-    private fun pollStatus(
+    private fun waitUntilAvailable(
         amiId: String,
         aws: Aws,
     ) {

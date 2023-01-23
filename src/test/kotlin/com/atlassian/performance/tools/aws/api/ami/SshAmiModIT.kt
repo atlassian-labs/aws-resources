@@ -5,6 +5,7 @@ import com.atlassian.performance.tools.aws.api.Investment
 import com.atlassian.performance.tools.aws.api.SshInstance
 import com.atlassian.performance.tools.aws.api.SshKeyFormula
 import com.atlassian.performance.tools.aws.api.ami.SshAmiMod.SshInstanceMod
+import com.atlassian.performance.tools.aws.api.ami.tiebreaker.NewestPendingAmi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.nio.file.Files.createTempDirectory
@@ -61,8 +62,11 @@ class SshAmiModIT {
 
             override fun tag() = uniqueTags
         }
+        val amiCache = TiebreakingAmiCache.Builder()
+            .tiebreaker(NewestPendingAmi())
+            .build()
         val sshAmiMod = SshAmiMod.Builder(brandNewMod)
-            .amiCache(TiebreakingAmiCache.Builder().build())
+            .amiCache(amiCache)
             .build()
 
         // when
