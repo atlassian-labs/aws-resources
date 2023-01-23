@@ -3,7 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 val kotlinVersion = "1.2.70"
 
 plugins {
-    kotlin("jvm").version("1.2.70")
+    kotlin("jvm").version("1.7.10")
     `java-library`
     id("com.atlassian.performance.tools.gradle-release").version("0.7.1")
 }
@@ -14,6 +14,10 @@ tasks.withType<Test>{
 }
 
 configurations.all {
+    // Workaround harvested from https://github.com/atlassian/virtual-users/pull/50/commits/24cdab615dd4c9d7a58cfeb38c1df3585324de6d
+    if (name.startsWith("kotlinCompiler")) {
+        return@all
+    }
     resolutionStrategy {
         activateDependencyLocking()
         failOnVersionConflict()
@@ -49,9 +53,9 @@ dependencies {
 
     log4jCore().forEach { implementation(it) }
 
-    testCompile("junit:junit:4.12")
-    testCompile("org.hamcrest:hamcrest-library:1.3")
-    testCompile("org.assertj:assertj-core:3.11.1")
+    testImplementation("junit:junit:4.12")
+    testImplementation("org.hamcrest:hamcrest-library:1.3")
+    testImplementation("org.assertj:assertj-core:3.11.1")
 }
 
 fun aws(
@@ -105,5 +109,5 @@ val testIntegration = task<Test>("testIntegration") {
 tasks["check"].dependsOn(testIntegration)
 
 val wrapper = tasks["wrapper"] as Wrapper
-wrapper.gradleVersion = "4.9"
+wrapper.gradleVersion = "7.6"
 wrapper.distributionType = Wrapper.DistributionType.ALL
