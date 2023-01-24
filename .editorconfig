@@ -1,2 +1,5 @@
 [*.{kt,kts}]
 indent_size = 4
+ij_kotlin_call_parameters_wrap = on_every_item
+ij_kotlin_method_parameters_wrap = split_into_lines
+ij_kotlin_allow_trailing_comma = true
