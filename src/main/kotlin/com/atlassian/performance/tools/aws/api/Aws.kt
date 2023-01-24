@@ -26,18 +26,19 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
 import com.atlassian.performance.tools.aws.*
 import com.atlassian.performance.tools.aws.api.ami.AmiProvider
 import com.atlassian.performance.tools.aws.api.ami.CanonicalAmiProvider
-import com.atlassian.performance.tools.concurrency.api.finishBy
+import com.atlassian.performance.tools.aws.api.housekeeping.ConcurrentHousekeeping
+import com.atlassian.performance.tools.aws.api.housekeeping.Housekeeping
 import com.atlassian.performance.tools.io.api.readResourceText
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.time.Duration
-import java.time.Instant.now
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.function.Predicate
+
 
 class Aws private constructor(
     val region: Regions,
+    private val housekeeping: Housekeeping,
     credentialsProvider: AWSCredentialsProvider,
     capacity: CapacityMediator,
     batchingCloudformationRefreshPeriod: Duration,
@@ -216,7 +217,8 @@ class Aws private constructor(
         requireHousekeeping = true,
         availabilityZoneFilter = { true },
         permissionsBoundaryPolicy = permissionsBoundaryPolicy,
-        amiProvider = CanonicalAmiProvider.Builder().build()
+        amiProvider = CanonicalAmiProvider.Builder().build(),
+        housekeeping = ConcurrentHousekeeping.Builder().build(),
     )
 
     @Deprecated(
@@ -248,7 +250,8 @@ class Aws private constructor(
         requireHousekeeping = false,
         availabilityZoneFilter = { true },
         permissionsBoundaryPolicy = permissionsBoundaryPolicy,
-        amiProvider = CanonicalAmiProvider.Builder().build()
+        amiProvider = CanonicalAmiProvider.Builder().build(),
+        housekeeping = ConcurrentHousekeeping.Builder().build(),
     )
 
     fun jiraStorage(
@@ -273,10 +276,7 @@ class Aws private constructor(
      * Releases all the expired AWS resources allocated by JPT.
      */
     fun cleanLeftovers() {
-        cleanLeftovers(
-            stacksReleaseTimeout = Duration.ofMinutes(5),
-            ec2ReleaseTimeout = Duration.ofMinutes(2)
-        )
+        housekeeping.cleanLeftovers(this)
     }
 
     /**
@@ -284,52 +284,21 @@ class Aws private constructor(
      *
      * @param stacksReleaseTimeout timeout for releasing expired cloudformation stacks.
      * @param ec2ReleaseTimeout timeout for releasing expired ec2 instances.
-     *
      * @since 1.5.0
      */
+    @Deprecated(
+        message = "Use cleanLeftovers() instead. You can use ConcurrentHousekeeping.Builder and inject it via Aws.Builder.housekeeping",
+        replaceWith = ReplaceWith("cleanLeftovers()"),
+    )
     fun cleanLeftovers(
         stacksReleaseTimeout: Duration,
         ec2ReleaseTimeout: Duration,
     ) {
-        val stacks = Cloudformation(this, cloudformation).listExpiredStacks()
-        waitUntilReleased(stacks, stacksReleaseTimeout)
-
-        val instances = Ec2(ec2).listExpiredInstances()
-        waitUntilReleased(instances, ec2ReleaseTimeout)
-
-        val keys = ec2.describeKeyPairs().keyPairs.map { key ->
-            RemoteSshKey(SshKeyName(key.keyName), ec2)
-        }.filter { it.isExpired() }
-
-        val securityGroups = ec2.describeSecurityGroups().securityGroups.map { securityGroup ->
-            Ec2SecurityGroup(securityGroup, ec2)
-        }.filter { it.isExpired() }
-
-        waitUntilReleased(keys)
-        waitUntilReleased(securityGroups)
-    }
-
-    private fun waitUntilReleased(
-        resources: List<Resource>,
-        timeout: Duration = Duration.ofSeconds(15),
-    ) {
-        val deadline = now() + timeout
-        resources
-            .map { startReleasing(it) }
-            .forEach { it.finishBy(deadline, logger) }
-    }
-
-    private fun startReleasing(
-        resource: Resource,
-    ): CompletableFuture<*> {
-        if (!resource.isExpired()) {
-            throw Exception("You can't release $resource. It hasn't expired.")
-        }
-        return resource.release().handle { throwable, _ ->
-            if (throwable != null) {
-                logger.error("$resource failed to release itself", throwable)
-            }
-        }
+        ConcurrentHousekeeping.Builder()
+            .stackTimeout(stacksReleaseTimeout)
+            .instanceTimeout(ec2ReleaseTimeout)
+            .build()
+            .cleanLeftovers(this)
     }
 
     fun listDisposableStacks(): List<Stack> {
@@ -360,6 +329,7 @@ class Aws private constructor(
         private var availabilityZoneFilter: Predicate<AvailabilityZone> = Predicate { true }
         private var permissionsBoundaryPolicy: String = ""
         private var amiProvider: AmiProvider = CanonicalAmiProvider.Builder().build()
+        private var housekeeping: Housekeeping = ConcurrentHousekeeping.Builder().build()
 
         /**
          * @param [credentialsProvider] A way to authenticate with your AWS account. This account will be used and billed.
@@ -411,7 +381,8 @@ class Aws private constructor(
             requireHousekeeping = true,
             availabilityZoneFilter = { availabilityZoneFilter.test(it) },
             permissionsBoundaryPolicy = permissionsBoundaryPolicy,
-            amiProvider = amiProvider
+            amiProvider = amiProvider,
+            housekeeping = housekeeping,
         )
     }
 }

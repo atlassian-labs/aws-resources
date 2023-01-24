@@ -28,6 +28,12 @@ Dropping a requirement of a major version of a dependency is a new contract.
 - Expose `CanonicalAmiProvider` to find Ubuntu AMIs by name.
 - Add `SshAmiMod` to modify existing AMIs.
 - Add `AmiCache` to `SshAmiMod` to reuse AMIs instead of recreating them every time.
+- Add `Housekeeping` interface, injectable via `Aws.Builder.housekeeping`.
+- Extract `ConcurrentHousekeeping` from `Aws.cleanLeftovers`. 
+- Add housekeeping for AMIs.
+
+### Deprecated
+- Deprecate `Aws.cleanLeftovers(Duration, Duration)` in favor of `ConcurrentHousekeeping.Builder`.
 
 ## [1.9.1] - 2023-01-24
 [1.9.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.9.1%0Drelease-1.9.0

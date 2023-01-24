@@ -16,10 +16,20 @@ class SshAmiMod private constructor(
     private val sshInstanceMod: SshInstanceMod,
     private val amiProvider: AmiProvider,
     private val amiCache: AmiCache,
-    private val investment: Investment,
+    private val amiLifespan: Duration,
 ) : AmiProvider {
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
+
+    private val amiInvestment = Investment(
+        useCase = sshInstanceMod.useCase,
+        lifespan = amiLifespan,
+    )
+    private val expectedImageSavingTime = Duration.ofMinutes(6)
+    private val instanceInvestment = Investment(
+        useCase = sshInstanceMod.useCase,
+        lifespan = sshInstanceMod.expectedDuration + expectedImageSavingTime,
+    )
 
     override fun provideAmiId(aws: Aws): String {
         val baseAmiId = amiProvider.provideAmiId(aws)
@@ -64,11 +74,11 @@ class SshAmiMod private constructor(
         aws: Aws,
         amiId: String,
     ): SshInstance {
-        val keyPrefix = investment.reuseKey()
-        val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(keyPrefix), keyPrefix, investment.lifespan).provision()
+        val keyPrefix = instanceInvestment.reuseKey()
+        val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(keyPrefix), keyPrefix, instanceInvestment.lifespan).provision()
         // don't use aws.awaitingEc2, it would cause infinite recursion
         val awaitingEc2 = AwaitingEc2(aws.ec2, aws.terminationBatchingEc2, aws.instanceNanny, amiId)
-        return awaitingEc2.allocateInstance(investment, sshKey, vpcId = null) { launch -> launch }
+        return awaitingEc2.allocateInstance(instanceInvestment, sshKey, vpcId = null) { launch -> launch }
     }
 
     private fun createAmi(
@@ -88,7 +98,7 @@ class SshAmiMod private constructor(
         val tags = tagMap.entries.map { (key, value) -> Tag(key, value) }
         val tagging = CreateTagsRequest()
             .withResources(amiId)
-            .withTags(tags)
+            .withTags(tags + amiInvestment.tag().map { it.toEc2() })
         aws.ec2.createTags(tagging)
     }
 
@@ -103,6 +113,8 @@ class SshAmiMod private constructor(
     }
 
     interface SshInstanceMod {
+        val expectedDuration: Duration
+        val useCase: String
         fun modify(sshInstance: SshInstance)
 
         /**
@@ -130,20 +142,17 @@ class SshAmiMod private constructor(
     ) {
         private var amiProvider: AmiProvider = CanonicalAmiProvider.Builder().build()
         private var amiCache: AmiCache = TiebreakingAmiCache.Builder().build()
-        private var investment: Investment = Investment(
-            useCase = "Modify an AMI image",
-            lifespan = Duration.ofMinutes(20),
-        )
+        private var amiLifespan: Duration = Duration.ofDays(30)
 
         fun amiProvider(amiProvider: AmiProvider) = apply { this.amiProvider = amiProvider }
         fun amiCache(amiCache: AmiCache) = apply { this.amiCache = amiCache }
-        fun investment(investment: Investment) = apply { this.investment = investment }
+        fun amiLifespan(lifespan: Duration) = apply { this.amiLifespan = lifespan }
 
         fun build(): SshAmiMod = SshAmiMod(
             sshInstanceMod = sshInstanceMod,
             amiProvider = amiProvider,
             amiCache = amiCache,
-            investment = investment,
+            amiLifespan = amiLifespan,
         )
     }
 }

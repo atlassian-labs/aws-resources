@@ -22,6 +22,9 @@ class SshAmiModIT {
                 sshInstance.ssh.newConnection().use { it.execute("echo kebab > some-file.txt") }
             }
 
+            override val expectedDuration = Duration.ofSeconds(5)
+            override val useCase = "SshAmiModIT.shouldEchoToFile"
+
             override fun tag() = mapOf(
                 "echo-content" to "kebab",
                 "echo-file" to "some-file.txt",
@@ -29,13 +32,14 @@ class SshAmiModIT {
         }
         val sshAmiMod = SshAmiMod.Builder(echo)
             .amiCache(NoAmiCache())
+            .amiLifespan(Duration.ofMinutes(30))
             .build()
 
         // when
         val newImageId = sshAmiMod.provideAmiId(aws)
 
         // then
-        val investment = Investment("SshAmiModIT.shouldEchoToFile", Duration.ofMinutes(10))
+        val investment = Investment(echo.useCase, Duration.ofMinutes(10))
         val prefix = investment.reuseKey()
         val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(prefix), prefix, investment.lifespan).provision()
         aws.awaitingEc2.allocateInstance(investment, sshKey, vpcId = null) { launch ->
@@ -55,6 +59,8 @@ class SshAmiModIT {
         )
         val brandNewMod = object : SshInstanceMod {
             var amisCreated = 0
+            override val expectedDuration = Duration.ofSeconds(1)
+            override val useCase = "SshAmiModIT.shouldReuseCachedAmi"
 
             override fun modify(sshInstance: SshInstance) {
                 amisCreated++
