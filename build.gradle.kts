@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion = "1.2.70"
 
@@ -8,7 +9,14 @@ plugins {
     id("com.atlassian.performance.tools.gradle-release").version("0.7.1")
 }
 
-tasks.withType<Test>{
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-language-version=1.3")
+    }
+}
+
+tasks.withType<Test> {
     testLogging.showStandardStreams = true
     testLogging.exceptionFormat = TestExceptionFormat.FULL
 }
