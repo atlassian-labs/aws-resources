@@ -12,7 +12,7 @@ plugins {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-language-version=1.3")
+        languageVersion = "1.4"
     }
 }
 
