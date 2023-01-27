@@ -23,7 +23,7 @@ tasks.withType<Test> {
 
 configurations.all {
     // Workaround harvested from https://github.com/atlassian/virtual-users/pull/50/commits/24cdab615dd4c9d7a58cfeb38c1df3585324de6d
-    if (name.startsWith("kotlinCompiler")) {
+    if (name.startsWith("kotlinCompiler") || name.startsWith("dokka")) {
         return@all
     }
     resolutionStrategy {
