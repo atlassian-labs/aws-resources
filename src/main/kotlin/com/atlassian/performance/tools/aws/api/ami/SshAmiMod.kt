@@ -16,19 +16,19 @@ class SshAmiMod private constructor(
     private val sshInstanceMod: SshInstanceMod,
     private val amiProvider: AmiProvider,
     private val amiCache: AmiCache,
-    private val amiLifespan: Duration,
+    private val amiLifespan: Duration
 ) : AmiProvider {
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
     private val amiInvestment = Investment(
         useCase = sshInstanceMod.useCase,
-        lifespan = amiLifespan,
+        lifespan = amiLifespan
     )
     private val expectedImageSavingTime = Duration.ofMinutes(6)
     private val instanceInvestment = Investment(
         useCase = sshInstanceMod.useCase,
-        lifespan = sshInstanceMod.expectedDuration + expectedImageSavingTime,
+        lifespan = sshInstanceMod.expectedDuration + expectedImageSavingTime
     )
 
     override fun provideAmiId(aws: Aws): String {
@@ -50,7 +50,7 @@ class SshAmiMod private constructor(
     private fun generateNewAmi(
         baseAmiId: String,
         tags: Map<String, String>,
-        aws: Aws,
+        aws: Aws
     ): String {
         logger.info("Generating new AMI based on $baseAmiId...")
         logger.debug("New AMI tags: $tags")
@@ -72,7 +72,7 @@ class SshAmiMod private constructor(
 
     private fun allocateSshInstance(
         aws: Aws,
-        amiId: String,
+        amiId: String
     ): SshInstance {
         val keyPrefix = instanceInvestment.reuseKey()
         val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(keyPrefix), keyPrefix, instanceInvestment.lifespan).provision()
@@ -83,7 +83,7 @@ class SshAmiMod private constructor(
 
     private fun createAmi(
         sshInstance: SshInstance,
-        aws: Aws,
+        aws: Aws
     ): String {
         val moddedAmiName = "jpt-ssh-ami-mod-" + UUID.randomUUID()
         val amiCreation = CreateImageRequest(sshInstance.instance.instanceId, moddedAmiName)
@@ -93,7 +93,7 @@ class SshAmiMod private constructor(
     private fun tag(
         amiId: String,
         tagMap: Map<String, String>,
-        aws: Aws,
+        aws: Aws
     ) {
         val tags = tagMap.entries.map { (key, value) -> Tag(key, value) }
         val tagging = CreateTagsRequest()
@@ -104,7 +104,7 @@ class SshAmiMod private constructor(
 
     private fun waitUntilAvailable(
         amiId: String,
-        aws: Aws,
+        aws: Aws
     ) {
         logger.info("Waiting for $amiId AMI to become available...")
         val waiterParameters = WaiterParameters(DescribeImagesRequest().withImageIds(amiId))
@@ -133,12 +133,12 @@ class SshAmiMod private constructor(
          */
         fun lookup(
             tags: Map<String, String>,
-            aws: Aws,
+            aws: Aws
         ): String?
     }
 
     class Builder(
-        private var sshInstanceMod: SshInstanceMod,
+        private var sshInstanceMod: SshInstanceMod
     ) {
         private var amiProvider: AmiProvider = CanonicalAmiProvider.Builder().build()
         private var amiCache: AmiCache = TiebreakingAmiCache.Builder().build()
@@ -152,7 +152,7 @@ class SshAmiMod private constructor(
             sshInstanceMod = sshInstanceMod,
             amiProvider = amiProvider,
             amiCache = amiCache,
-            amiLifespan = amiLifespan,
+            amiLifespan = amiLifespan
         )
     }
 }

@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 class ConcurrentHousekeeping(
     private val stackTimeout: Duration,
     private val instanceTimeout: Duration,
-    private val amiTimeout: Duration,
+    private val amiTimeout: Duration
 ) : Housekeeping {
     private val logger = LogManager.getLogger(this::class.java)
 
@@ -40,7 +40,7 @@ class ConcurrentHousekeeping(
 
     private fun waitUntilReleased(
         resources: List<Resource>,
-        timeout: Duration = Duration.ofSeconds(15),
+        timeout: Duration = Duration.ofSeconds(15)
     ) {
         val deadline = now() + timeout
         resources
@@ -49,7 +49,7 @@ class ConcurrentHousekeeping(
     }
 
     private fun startReleasing(
-        resource: Resource,
+        resource: Resource
     ): CompletableFuture<*> {
         if (!resource.isExpired()) {
             throw Exception("You can't release $resource. It hasn't expired.")
@@ -74,7 +74,7 @@ class ConcurrentHousekeeping(
             return ConcurrentHousekeeping(
                 stackTimeout = stackTimeout,
                 instanceTimeout = instanceTimeout,
-                amiTimeout = amiTimeout,
+                amiTimeout = amiTimeout
             )
         }
     }

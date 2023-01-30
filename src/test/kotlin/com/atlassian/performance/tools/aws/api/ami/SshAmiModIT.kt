@@ -27,7 +27,7 @@ class SshAmiModIT {
 
             override fun tag() = mapOf(
                 "echo-content" to "kebab",
-                "echo-file" to "some-file.txt",
+                "echo-file" to "some-file.txt"
             )
         }
         val sshAmiMod = SshAmiMod.Builder(echo)
@@ -55,7 +55,7 @@ class SshAmiModIT {
         // given
         val uniqueTags = mapOf(
             "cache-key1" to UUID.randomUUID().toString(),
-            "cache-key2" to UUID.randomUUID().toString(),
+            "cache-key2" to UUID.randomUUID().toString()
         )
         val brandNewMod = object : SshInstanceMod {
             var amisCreated = 0

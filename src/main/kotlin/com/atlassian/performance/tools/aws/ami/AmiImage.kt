@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture
 
 internal class AmiImage(
     private val image: Image,
-    private val ec2: AmazonEC2,
+    private val ec2: AmazonEC2
 ) : Resource {
     private val expiry = Investment.parseExpiry(image.tags.map { Tag(it) })
     override fun isExpired() = expiry?.isBefore(now()) ?: false
