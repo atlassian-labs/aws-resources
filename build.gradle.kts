@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val kotlinVersion = "1.2.70"
 
 plugins {
-    kotlin("jvm").version("1.7.10")
+    kotlin("jvm").version("1.3.20") // the minimum plugin version working with this Gradle version
     `java-library`
     id("com.atlassian.performance.tools.gradle-release").version("0.8.0")
 }
@@ -12,7 +12,7 @@ plugins {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "1.8"
-        languageVersion = "1.4"
+        languageVersion = "1.2" // the maximum, which still produces 1.1.x metadata required by 1.2.70 kotlin clients
     }
 }
 

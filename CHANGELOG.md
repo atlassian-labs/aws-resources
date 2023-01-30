@@ -25,10 +25,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ### Fixed
 - Remove incompatible dependency from POM. Fix [JPERF-944]. Progress on [JPERF-466].
+- Restore Kotlin metadata compatibility. Fix [JPERF-945].
 
 [JPERF-466]: https://ecosystem.atlassian.net/browse/JPERF-466
 
-## [1.10.1] - 2023-01-27
+## [1.10.1] - 2023-01-27 🐛🐛
 [1.10.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.10.1%0Drelease-1.9.1
 
 ### Added
