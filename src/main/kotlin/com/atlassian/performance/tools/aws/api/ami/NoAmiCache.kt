@@ -4,6 +4,9 @@ import com.atlassian.performance.tools.aws.api.Aws
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
+/**
+ * @since v1.10.1
+ */
 class NoAmiCache : SshAmiMod.AmiCache {
 
     private val logger: Logger = LogManager.getLogger(this::class.java)

@@ -369,6 +369,7 @@ class Aws private constructor(
 
         /**
          * @param [amiProvider] A way to choose the default AMI.
+         * @since v1.10.1
          */
         fun amiProvider(amiProvider: AmiProvider): Builder = apply { this.amiProvider = amiProvider }
 
