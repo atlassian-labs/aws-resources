@@ -46,6 +46,9 @@ This version introduced two incompatibilities:
 [JPERF-944]: https://ecosystem.atlassian.net/browse/JPERF-944
 [JPERF-945]: https://ecosystem.atlassian.net/browse/JPERF-945
 
+## 1.10.0
+This version was not published due to a bug. Use [1.10.1] instead.
+
 ## [1.9.1] - 2023-01-24
 [1.9.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.9.1%0Drelease-1.9.0
 
