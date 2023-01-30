@@ -38,6 +38,14 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ### Deprecated
 - Deprecate `Aws.cleanLeftovers(Duration, Duration)` in favor of `ConcurrentHousekeeping.Builder`.
 
+### INCOMPATIBILITY BUG
+This version introduced two incompatibilities:
+- Accidentally declare an incompatible dependency on `kotlin-stdlib-jdk8`: [JPERF-944].
+- Bump Kotlin language to an incompatible language version 1.4 (from 1.1): [JPERF-945].
+
+[JPERF-944]: https://ecosystem.atlassian.net/browse/JPERF-944
+[JPERF-945]: https://ecosystem.atlassian.net/browse/JPERF-945
+
 ## [1.9.1] - 2023-01-24
 [1.9.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.9.1%0Drelease-1.9.0
 
