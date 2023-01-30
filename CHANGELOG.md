@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.10.1
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.10.2
+
+## [1.10.1] - 2023-01-30
+[1.10.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.10.2%0Drelease-1.10.1
 
 ### Fixed
 - Remove incompatible dependency from POM. Fix [JPERF-944]. Progress on [JPERF-466].
