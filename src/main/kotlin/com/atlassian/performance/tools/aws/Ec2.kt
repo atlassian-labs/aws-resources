@@ -9,7 +9,7 @@ import com.atlassian.performance.tools.aws.api.TerminationBatchingEc2
 import com.atlassian.performance.tools.aws.api.TerminationPollingEc2
 
 internal class Ec2(
-    private val ec2: AmazonEC2,
+    private val ec2: AmazonEC2
 ) {
     fun listExpiredInstances(): List<Resource> {
         val scrollingEc2 = TokenScrollingEc2(ec2)

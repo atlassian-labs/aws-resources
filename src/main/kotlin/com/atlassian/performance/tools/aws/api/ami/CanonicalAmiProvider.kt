@@ -4,7 +4,7 @@ import com.atlassian.performance.tools.aws.api.Aws
 import com.atlassian.performance.tools.aws.api.CanonicalImageIdByNameResolver
 
 class CanonicalAmiProvider private constructor(
-    private val imageName: String,
+    private val imageName: String
 ) : AmiProvider {
 
     override fun provideAmiId(aws: Aws): String {

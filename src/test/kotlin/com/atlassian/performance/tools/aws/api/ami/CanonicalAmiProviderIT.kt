@@ -85,6 +85,6 @@ class CanonicalAmiProviderIT {
 
         val imageId = amiProvider.provideAmiId(aws)
 
-        assertThat(imageId).isNotEmpty
+        assertThat(imageId).isNotEmpty()
     }
 }

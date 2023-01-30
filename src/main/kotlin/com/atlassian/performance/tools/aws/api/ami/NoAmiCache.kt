@@ -10,7 +10,7 @@ class NoAmiCache : SshAmiMod.AmiCache {
 
     override fun lookup(
         tags: Map<String, String>,
-        aws: Aws,
+        aws: Aws
     ): String? {
         logger.debug("Skipping AMI cache")
         return null

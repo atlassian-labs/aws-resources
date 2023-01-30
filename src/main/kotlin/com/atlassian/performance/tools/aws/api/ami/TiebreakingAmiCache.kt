@@ -10,14 +10,14 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
 class TiebreakingAmiCache private constructor(
-    private val tiebreaker: AmiTiebreaker,
+    private val tiebreaker: AmiTiebreaker
 ) : AmiCache {
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
     override fun lookup(
         tags: Map<String, String>,
-        aws: Aws,
+        aws: Aws
     ): String? {
         val filters = tags.map { (key, value) -> Filter("tag:$key", listOf(value)) }
         val amis = aws.ec2.describeImages(DescribeImagesRequest().withFilters(filters)).images

@@ -46,7 +46,7 @@ class Aws private constructor(
     requireHousekeeping: Boolean,
     availabilityZoneFilter: (AvailabilityZone) -> Boolean,
     permissionsBoundaryPolicy: String,
-    amiProvider: AmiProvider,
+    amiProvider: AmiProvider
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -207,7 +207,7 @@ class Aws private constructor(
         regionsWithHousekeeping: List<Regions>,
         capacity: CapacityMediator,
         batchingCloudformationRefreshPeriod: Duration,
-        permissionsBoundaryPolicy: String,
+        permissionsBoundaryPolicy: String
     ) : this(
         region = region,
         credentialsProvider = credentialsProvider,
@@ -218,7 +218,7 @@ class Aws private constructor(
         availabilityZoneFilter = { true },
         permissionsBoundaryPolicy = permissionsBoundaryPolicy,
         amiProvider = CanonicalAmiProvider.Builder().build(),
-        housekeeping = ConcurrentHousekeeping.Builder().build(),
+        housekeeping = ConcurrentHousekeeping.Builder().build()
     )
 
     @Deprecated(
@@ -239,7 +239,7 @@ class Aws private constructor(
         credentialsProvider: AWSCredentialsProvider,
         capacity: CapacityMediator = TextCapacityMediator(region),
         batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1),
-        permissionsBoundaryPolicy: String,
+        permissionsBoundaryPolicy: String
 
         ) : this(
         region = region,
@@ -251,25 +251,25 @@ class Aws private constructor(
         availabilityZoneFilter = { true },
         permissionsBoundaryPolicy = permissionsBoundaryPolicy,
         amiProvider = CanonicalAmiProvider.Builder().build(),
-        housekeeping = ConcurrentHousekeeping.Builder().build(),
+        housekeeping = ConcurrentHousekeeping.Builder().build()
     )
 
     fun jiraStorage(
-        nonce: String,
+        nonce: String
     ) = shortTermStorage.findStorage("JiraBucket", nonce)
 
     fun virtualUsersStorage(
-        nonce: String,
+        nonce: String
     ) = shortTermStorage.findStorage("VirtualUsersBucket", nonce)
 
     fun resultsStorage(
-        nonce: String,
+        nonce: String
     ) = shortTermStorage.findStorage("ResultsBucket", nonce)
 
     fun shortTermStorageAccess() = shortTermStorage.findInstanceProfile("AccessProfile")
 
     fun customDatasetStorage(
-        datasetName: String,
+        datasetName: String
     ) = customDatasetStorage.findStorage("DatasetBucket", datasetName)
 
     /**
@@ -288,11 +288,11 @@ class Aws private constructor(
      */
     @Deprecated(
         message = "Use cleanLeftovers() instead. You can use ConcurrentHousekeeping.Builder and inject it via Aws.Builder.housekeeping",
-        replaceWith = ReplaceWith("cleanLeftovers()"),
+        replaceWith = ReplaceWith("cleanLeftovers()")
     )
     fun cleanLeftovers(
         stacksReleaseTimeout: Duration,
-        ec2ReleaseTimeout: Duration,
+        ec2ReleaseTimeout: Duration
     ) {
         ConcurrentHousekeeping.Builder()
             .stackTimeout(stacksReleaseTimeout)
@@ -311,7 +311,7 @@ class Aws private constructor(
      * @param [region] AWS region to allocate all resources in. Note that many kinds of resources are region-specific.
      */
     class Builder constructor(
-        private val region: Regions,
+        private val region: Regions
     ) {
         private var credentialsProvider: AWSCredentialsProvider = AWSCredentialsProviderChain(
             STSAssumeRoleWithWebIdentitySessionCredentialsProvider.Builder(
@@ -382,7 +382,7 @@ class Aws private constructor(
             availabilityZoneFilter = { availabilityZoneFilter.test(it) },
             permissionsBoundaryPolicy = permissionsBoundaryPolicy,
             amiProvider = amiProvider,
-            housekeeping = housekeeping,
+            housekeeping = housekeeping
         )
     }
 }
