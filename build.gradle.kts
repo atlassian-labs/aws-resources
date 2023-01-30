@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val kotlinVersion = "1.2.70"
 
 plugins {
-    kotlin("jvm").version("1.3.20") // the minimum plugin version working with this Gradle version
+    kotlin("jvm").version("1.4.32") // the maximum plugin version still supporting language version 1.2
     `java-library`
     id("com.atlassian.performance.tools.gradle-release").version("0.8.0")
 }
