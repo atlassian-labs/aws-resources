@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.10.2
 
+### Added
+- Grant default permissions to EC2 in `SshAmiMod`. Resolve [JPERF-932].
+
+[JPERF-932]: https://ecosystem.atlassian.net/browse/JPERF-932
+
 ## [1.10.2] - 2023-01-30
 [1.10.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.10.2%0Drelease-1.10.1
 

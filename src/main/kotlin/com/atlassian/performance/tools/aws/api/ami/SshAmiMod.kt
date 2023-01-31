@@ -1,8 +1,6 @@
 package com.atlassian.performance.tools.aws.api.ami
 
-import com.amazonaws.services.ec2.model.CreateImageRequest
-import com.amazonaws.services.ec2.model.CreateTagsRequest
-import com.amazonaws.services.ec2.model.DescribeImagesRequest
+import com.amazonaws.services.ec2.model.*
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.waiters.WaiterParameters
 import com.atlassian.performance.tools.aws.api.*
@@ -34,6 +32,11 @@ class SshAmiMod private constructor(
         lifespan = sshInstanceMod.expectedDuration + expectedImageSavingTime
     )
 
+    /**
+     * If the [amiCache] finds an AMI matching [sshInstanceMod] and [amiProvider], it will be reused.
+     * Otherwise, it will allocate a new EC2 instance to apply the [sshInstanceMod].
+     * The EC2 instance has `aws.shortTermStorageAccess()` permissions by default.
+     */
     override fun provideAmiId(aws: Aws): String {
         val baseAmiId = amiProvider.provideAmiId(aws)
         val cacheKeyTags = cacheKeyTags(baseAmiId)
@@ -81,7 +84,10 @@ class SshAmiMod private constructor(
         val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(keyPrefix), keyPrefix, instanceInvestment.lifespan).provision()
         // don't use aws.awaitingEc2, it would cause infinite recursion
         val awaitingEc2 = AwaitingEc2(aws.ec2, aws.terminationBatchingEc2, aws.instanceNanny, amiId)
-        return awaitingEc2.allocateInstance(instanceInvestment, sshKey, vpcId = null) { launch -> launch }
+        return awaitingEc2.allocateInstance(instanceInvestment, sshKey, vpcId = null) { launch ->
+            val instanceProfile = IamInstanceProfileSpecification().withName(aws.shortTermStorageAccess())
+            launch.withIamInstanceProfile(instanceProfile)
+        }
     }
 
     private fun createAmi(
