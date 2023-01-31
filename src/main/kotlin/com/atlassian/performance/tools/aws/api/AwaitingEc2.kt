@@ -26,6 +26,7 @@ class AwaitingEc2(
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
     /**
+     * Logs SSH command to connect to the instance.
      * @param vpcId if null, the default VPC will be used
      */
     fun allocateInstance(
@@ -43,6 +44,7 @@ class AwaitingEc2(
             .reservations
             .flatMap { it.instances }
             .single()
+        key.file.facilitateSsh(startedInstance.publicIpAddress)
         return SshInstance(
             ssh = Ssh(
                 host = SshHost(startedInstance.publicIpAddress, launchRequest.additionalInfo, key.file.path),
