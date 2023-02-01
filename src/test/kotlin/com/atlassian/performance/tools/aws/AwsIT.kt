@@ -1,10 +1,12 @@
 package com.atlassian.performance.tools.aws
 
-import com.amazonaws.services.cloudformation.model.StackStatus.*
 import com.amazonaws.services.cloudformation.model.Parameter
+import com.amazonaws.services.cloudformation.model.StackStatus.*
 import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification
 import com.amazonaws.services.ec2.model.RunInstancesRequest
+import com.amazonaws.services.identitymanagement.model.*
 import com.atlassian.performance.tools.aws.IntegrationTestRuntime.aws
+import com.atlassian.performance.tools.aws.api.Aws
 import com.atlassian.performance.tools.aws.api.Investment
 import com.atlassian.performance.tools.aws.api.SshKeyFormula
 import com.atlassian.performance.tools.aws.api.StackFormula
@@ -33,7 +35,9 @@ class AwsIT {
             investment = investment,
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
             aws = aws,
-            parameters = listOf(Parameter().withParameterKey("PermissionBoundaryPolicyARN").withParameterValue(""))
+            parameters = listOf(
+                Parameter().withParameterKey("PermissionBoundaryPolicyARN").withParameterValue("")
+            )
         )
 
         val stack = stackFormula.provision()
@@ -89,6 +93,27 @@ class AwsIT {
         sshKey.remote.release().get()
     }
 
+    @Test
+    fun shouldAttachManagedPolicyArnsToShortTermStorage() {
+        val expectedPolicies = listOf(
+            "arn:aws:iam::aws:policy/AWSDirectConnectReadOnlyAccess",
+            "arn:aws:iam::aws:policy/AmazonGlacierReadOnlyAccess"
+        )
+
+        val aws = Aws.Builder(aws).managedPolicyArns(expectedPolicies).build()
+        val shortTermStorageAccess = aws.shortTermStorageAccess()
+
+        val storageRole = aws.iam
+            .getInstanceProfile(GetInstanceProfileRequest().withInstanceProfileName(shortTermStorageAccess))
+            .instanceProfile.roles.first().roleName
+        assertThat(storageRole).contains("jpt-short-term-storage")
+        val actualPolicies = aws.iam
+            .listAttachedRolePolicies(ListAttachedRolePoliciesRequest().withRoleName(storageRole))
+            .attachedPolicies
+        assertThat(actualPolicies)
+            .extracting("policyArn")
+            .hasSameElementsAs(expectedPolicies)
+    }
 
     private fun RunInstancesRequest.withAwsCli(): RunInstancesRequest {
         return withImageId("ami-0bc20ae5d1b732be4")

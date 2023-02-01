@@ -26,7 +26,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ### Added
 - Add logging ssh access in `AwaitingEc2`. [JPERF-954].
 - Grant default permissions to EC2 in `SshAmiMod`. Resolve [JPERF-932].
-
+- Add ability to pass a list of managed policies arns to `Aws`. Progress on [JPERF-932].
+- Add copying builder to `Aws`.
+- Expose `AWSCredentialsProvider` from `Aws`.
 
 [JPERF-954]: https://ecosystem.atlassian.net/browse/JPERF-954
 [JPERF-932]: https://ecosystem.atlassian.net/browse/JPERF-932

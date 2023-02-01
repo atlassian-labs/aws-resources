@@ -39,14 +39,15 @@ import java.util.function.Predicate
 class Aws private constructor(
     val region: Regions,
     private val housekeeping: Housekeeping,
-    credentialsProvider: AWSCredentialsProvider,
-    capacity: CapacityMediator,
-    batchingCloudformationRefreshPeriod: Duration,
-    regionsWithHousekeeping: List<Regions>,
-    requireHousekeeping: Boolean,
-    availabilityZoneFilter: (AvailabilityZone) -> Boolean,
-    permissionsBoundaryPolicy: String,
-    amiProvider: AmiProvider
+    val credentialsProvider: AWSCredentialsProvider,
+    private val capacity: CapacityMediator,
+    private val batchingCloudformationRefreshPeriod: Duration,
+    private val regionsWithHousekeeping: List<Regions>,
+    private val requireHousekeeping: Boolean,
+    private val availabilityZoneFilter: (AvailabilityZone) -> Boolean,
+    private val permissionsBoundaryPolicy: String,
+    private val amiProvider: AmiProvider,
+    private val managedPolicyArns: List<String>
 ) {
     private val logger: Logger = LogManager.getLogger(this::class.java)
     val ec2: AmazonEC2 = AmazonEC2ClientBuilder.standard()
@@ -112,7 +113,9 @@ class Aws private constructor(
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
             parameters = listOf(
                 Parameter().withParameterKey("PermissionBoundaryPolicyARN")
-                    .withParameterValue(permissionsBoundaryPolicy)
+                    .withParameterValue(permissionsBoundaryPolicy),
+                Parameter().withParameterKey("PolicyArns")
+                    .withParameterValue(managedPolicyArns.joinToString(separator = ","))
             ),
             aws = this
         ).provision()
@@ -218,7 +221,8 @@ class Aws private constructor(
         availabilityZoneFilter = { true },
         permissionsBoundaryPolicy = permissionsBoundaryPolicy,
         amiProvider = CanonicalAmiProvider.Builder().build(),
-        housekeeping = ConcurrentHousekeeping.Builder().build()
+        housekeeping = ConcurrentHousekeeping.Builder().build(),
+        managedPolicyArns = emptyList()
     )
 
     @Deprecated(
@@ -241,7 +245,7 @@ class Aws private constructor(
         batchingCloudformationRefreshPeriod: Duration = Duration.ofMinutes(1),
         permissionsBoundaryPolicy: String
 
-        ) : this(
+    ) : this(
         region = region,
         credentialsProvider = credentialsProvider,
         capacity = capacity,
@@ -251,7 +255,8 @@ class Aws private constructor(
         availabilityZoneFilter = { true },
         permissionsBoundaryPolicy = permissionsBoundaryPolicy,
         amiProvider = CanonicalAmiProvider.Builder().build(),
-        housekeeping = ConcurrentHousekeeping.Builder().build()
+        housekeeping = ConcurrentHousekeeping.Builder().build(),
+        managedPolicyArns = emptyList()
     )
 
     fun jiraStorage(
@@ -330,6 +335,19 @@ class Aws private constructor(
         private var permissionsBoundaryPolicy: String = ""
         private var amiProvider: AmiProvider = CanonicalAmiProvider.Builder().build()
         private var housekeeping: Housekeeping = ConcurrentHousekeeping.Builder().build()
+        private var managedPolicyArns: List<String> = emptyList()
+
+        constructor(aws: Aws) : this(aws.region) {
+            housekeeping = aws.housekeeping
+            credentialsProvider = aws.credentialsProvider
+            capacity = aws.capacity
+            batchingCloudformationRefreshPeriod = aws.batchingCloudformationRefreshPeriod
+            regionsWithHousekeeping = aws.regionsWithHousekeeping
+            availabilityZoneFilter = Predicate { availabilityZoneFilter.test(it) }
+            permissionsBoundaryPolicy = aws.permissionsBoundaryPolicy
+            amiProvider = aws.amiProvider
+            managedPolicyArns = aws.managedPolicyArns
+        }
 
         /**
          * @param [credentialsProvider] A way to authenticate with your AWS account. This account will be used and billed.
@@ -373,6 +391,13 @@ class Aws private constructor(
          */
         fun amiProvider(amiProvider: AmiProvider): Builder = apply { this.amiProvider = amiProvider }
 
+        /**
+         * @param [managedPolicyArns] A way to attach additional managed policies to [shortTermStorage].
+         */
+
+        fun managedPolicyArns(managedPolicyArns: List<String>): Builder =
+            apply { this.managedPolicyArns = managedPolicyArns }
+
         fun build(): Aws = Aws(
             region = region,
             credentialsProvider = credentialsProvider,
@@ -383,7 +408,8 @@ class Aws private constructor(
             availabilityZoneFilter = { availabilityZoneFilter.test(it) },
             permissionsBoundaryPolicy = permissionsBoundaryPolicy,
             amiProvider = amiProvider,
-            housekeeping = housekeeping
+            housekeeping = housekeeping,
+            managedPolicyArns = managedPolicyArns
         )
     }
 }

@@ -3,9 +3,14 @@ Description: Stores files needed during a test. IAM profiles provision slowly, s
 Parameters:
   PermissionBoundaryPolicyARN:
     Description: The Permission Boundary Policy ARN
-    Type: 'String'
+    Type: String
+  PolicyArns:
+    Type: CommaDelimitedList
+    Description: ARNs of the optional IAM Managed Policies to add to the role
+    Default: ""
 Conditions:
-  SetPermissionBoundary: !Not [!Equals [!Ref PermissionBoundaryPolicyARN, ""]]
+  SetPermissionBoundary: !Not [ !Equals [ !Ref PermissionBoundaryPolicyARN, "" ] ]
+  SetPolicyArns: !Not [ !Equals [ !Join [ "",  !Ref PolicyArns ], "" ] ]
 Resources:
   StorageRole:
     Type: AWS::IAM::Role
@@ -21,7 +26,9 @@ Resources:
           Action:
             - sts:AssumeRole
       PermissionsBoundary:
-            !If [SetPermissionBoundary, !Ref PermissionBoundaryPolicyARN, !Ref "AWS::NoValue"]
+        !If [ SetPermissionBoundary, !Ref PermissionBoundaryPolicyARN, !Ref "AWS::NoValue" ]
+      ManagedPolicyArns:
+        !If [ SetPolicyArns, !Ref PolicyArns, !Ref "AWS::NoValue"]
       Policies:
         - PolicyName: ShortTermStoragePolicy
           PolicyDocument:
