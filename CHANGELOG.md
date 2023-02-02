@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.11.0
 
+### Fixed
+- Improve `SshAmiMod` logging for clarity when there are multiple AMIs created in the same run.
+
 ## [1.11.0] - 2023-02-01
 [1.11.0]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.11.0%0Drelease-1.10.2
 ### Added

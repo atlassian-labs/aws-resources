@@ -1,9 +1,17 @@
 package com.atlassian.performance.tools.aws.api.ami
 
-import com.amazonaws.services.ec2.model.*
+import com.amazonaws.services.ec2.model.CreateImageRequest
+import com.amazonaws.services.ec2.model.CreateTagsRequest
+import com.amazonaws.services.ec2.model.DescribeImagesRequest
+import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.waiters.WaiterParameters
-import com.atlassian.performance.tools.aws.api.*
+import com.atlassian.performance.tools.aws.api.AwaitingEc2
+import com.atlassian.performance.tools.aws.api.Aws
+import com.atlassian.performance.tools.aws.api.Investment
+import com.atlassian.performance.tools.aws.api.SshInstance
+import com.atlassian.performance.tools.aws.api.SshKeyFormula
+import com.atlassian.performance.tools.jvmtasks.api.TaskTimer.time
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.nio.file.Files.createTempDirectory
@@ -22,13 +30,15 @@ class SshAmiMod private constructor(
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
+    private val useCase = sshInstanceMod.useCase
+
     private val amiInvestment = Investment(
-        useCase = sshInstanceMod.useCase,
+        useCase = useCase,
         lifespan = amiLifespan
     )
     private val expectedImageSavingTime = Duration.ofMinutes(6)
     private val instanceInvestment = Investment(
-        useCase = sshInstanceMod.useCase,
+        useCase = useCase,
         lifespan = sshInstanceMod.expectedDuration + expectedImageSavingTime
     )
 
@@ -39,13 +49,15 @@ class SshAmiMod private constructor(
      */
     override fun provideAmiId(aws: Aws): String {
         val baseAmiId = amiProvider.provideAmiId(aws)
-        val cacheKeyTags = cacheKeyTags(baseAmiId)
-        val cachedAmiId = amiCache.lookup(cacheKeyTags, aws)
-        return if (cachedAmiId != null) {
-            waitUntilAvailable(cachedAmiId, aws)
-            cachedAmiId
-        } else {
-            generateNewAmi(baseAmiId, cacheKeyTags, aws)
+        return time("ami use case: '$useCase' / base: $baseAmiId") {
+            val cacheKeyTags = cacheKeyTags(baseAmiId)
+            val cachedAmiId = amiCache.lookup(cacheKeyTags, aws)
+            if (cachedAmiId != null) {
+                waitUntilAvailable(cachedAmiId, aws)
+                cachedAmiId
+            } else {
+                generateNewAmi(baseAmiId, cacheKeyTags, aws)
+            }
         }
     }
 
@@ -58,7 +70,7 @@ class SshAmiMod private constructor(
         tags: Map<String, String>,
         aws: Aws
     ): String {
-        logger.info("Generating new AMI based on $baseAmiId...")
+        logger.info("Generating new AMI for use case '$useCase'...")
         logger.debug("New AMI tags: $tags")
         val sshInstance = allocateSshInstance(aws, baseAmiId)
         try {
@@ -114,11 +126,13 @@ class SshAmiMod private constructor(
     private fun waitUntilAvailable(
         amiId: String,
         aws: Aws
-    ) {
-        logger.info("Waiting for $amiId AMI to become available...")
+    ) = {
+        logger.info("Waiting for '$useCase' AMI to become available...")
         val waiterParameters = WaiterParameters(DescribeImagesRequest().withImageIds(amiId))
         aws.ec2.waiters().imageAvailable().run(waiterParameters)
-        logger.info("The $amiId AMI is available")
+        logger.info("The '$useCase' AMI is available")
+    }.let {
+        time("ami-wait") { it() }
     }
 
     interface SshInstanceMod {
