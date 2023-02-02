@@ -21,8 +21,9 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.11.0
+[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.11.1
 
+## [1.11.1] - 2023-02-02
 ### Fixed
 - Improve `SshAmiMod` logging for clarity when there are multiple AMIs created in the same run.
 
