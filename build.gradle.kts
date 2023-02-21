@@ -1,4 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion = "1.2.70"
@@ -14,11 +13,6 @@ tasks.withType<KotlinCompile> {
         jvmTarget = "1.8"
         languageVersion = "1.2" // the maximum, which still produces 1.1.x metadata required by 1.2.70 kotlin clients
     }
-}
-
-tasks.withType<Test> {
-    testLogging.showStandardStreams = true
-    testLogging.exceptionFormat = TestExceptionFormat.FULL
 }
 
 configurations.all {
