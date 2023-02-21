@@ -1,0 +1,59 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release? yes/no'
+        default: 'no'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Auth AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+        timeout-minutes: 15
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    needs: build
+    if: github.event.inputs.release == 'yes'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Auth Maven
+        id: publish-token
+        uses: atlassian-labs/artifact-publish-token@v1.0.1
+      - name: Release
+        env:
+          atlassian_private_username: ${{ steps.publish-token.outputs.artifactoryUsername }}
+          atlassian_private_password: ${{ steps.publish-token.outputs.artifactoryApiKey }}
+        run: |
+          ./gradlew release \
+              -Prelease.customUsername=${{ github.actor }} \
+              -Prelease.customPassword=${{ github.token }}
+          ./gradlew publish
