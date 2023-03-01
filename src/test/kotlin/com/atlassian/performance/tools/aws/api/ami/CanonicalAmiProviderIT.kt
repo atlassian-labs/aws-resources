@@ -81,7 +81,7 @@ class CanonicalAmiProviderIT {
         val aws = Aws.Builder(region)
             .regionsWithHousekeeping(listOf(region))
             .build()
-        val amiProvider = CanonicalAmiProvider.Builder().build()
+        val amiProvider: CanonicalAmiProvider = CanonicalAmiProvider.Builder().build()
 
         val imageId = amiProvider.provideAmiId(aws)
 

@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.11.1
 
+### Fixed
+- Fix apt lock failures caused by unattended upgrades on Ubuntu Focal. Fix [JPERF-971].
+
+[JPERF-971]: https://ecosystem.atlassian.net/browse/JPERF-971
+
 ## [1.11.1] - 2023-02-02
 ### Fixed
 - Improve `SshAmiMod` logging for clarity when there are multiple AMIs created in the same run.

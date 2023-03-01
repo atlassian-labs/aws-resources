@@ -1,5 +1,6 @@
 package com.atlassian.performance.tools.aws.api.ami
 
+import com.atlassian.performance.tools.aws.ami.UnattendedUpgradesOptOut
 import com.atlassian.performance.tools.aws.api.Aws
 import com.atlassian.performance.tools.aws.api.CanonicalImageIdByNameResolver
 
@@ -7,11 +8,24 @@ import com.atlassian.performance.tools.aws.api.CanonicalImageIdByNameResolver
  * @since v1.10.1
  */
 class CanonicalAmiProvider private constructor(
-    private val imageName: String
+    private val imageName: String,
+    private val avoidUnattendedUpgrades: Boolean
 ) : AmiProvider {
 
     override fun provideAmiId(aws: Aws): String {
-        return CanonicalImageIdByNameResolver.Builder(aws.ec2)
+        val base = ImageNameResolver()
+        val provider = if (avoidUnattendedUpgrades) {
+            SshAmiMod.Builder(UnattendedUpgradesOptOut())
+                .amiProvider(base)
+                .build()
+        } else {
+            base
+        }
+        return provider.provideAmiId(aws)
+    }
+
+    private inner class ImageNameResolver : AmiProvider {
+        override fun provideAmiId(aws: Aws): String = CanonicalImageIdByNameResolver.Builder(aws.ec2)
             .region(aws.region)
             .build()
             .invoke(imageName)
@@ -21,10 +35,25 @@ class CanonicalAmiProvider private constructor(
         private val focal = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
         private var imageName = focal
 
-        fun imageName(imageName: String) = apply { this.imageName = imageName }
+        /**
+         * Old Ubuntu versions don't have this feature. Trying to remove this feature fails if it doesn't exist.
+         * Probably we could solve this problem via feature detection in [UnattendedUpgradesOptOut].
+         */
+        private var avoidUnattendedUpgrades = true
 
-        fun focal() = imageName(focal)
+        /**
+         * Might not benefit from version-specific improvements.
+         */
+        fun imageName(imageName: String) = apply {
+            avoidUnattendedUpgrades = false
+            this.imageName = imageName
+        }
 
-        fun build(): CanonicalAmiProvider = CanonicalAmiProvider(imageName)
+        fun focal(): Builder {
+            avoidUnattendedUpgrades = true
+            return imageName(focal)
+        }
+
+        fun build(): CanonicalAmiProvider = CanonicalAmiProvider(imageName, avoidUnattendedUpgrades)
     }
 }
