@@ -32,6 +32,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 [JPERF-971]: https://ecosystem.atlassian.net/browse/JPERF-971
 
 ## [1.11.1] - 2023-02-02
+[1.11.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.11.1%0Drelease-1.11.0
 ### Fixed
 - Improve `SshAmiMod` logging for clarity when there are multiple AMIs created in the same run.
 
@@ -86,7 +87,9 @@ This version was not published due to a bug. Use [1.10.1] instead.
 [1.9.1]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.9.1%0Drelease-1.9.0
 
 ### Fixed
-- Upgrade Ubuntu image to 20.04 LTS (Focal Fossa). Unblocks [JPERF-917]
+- Upgrade Ubuntu image to 20.04 LTS (Focal Fossa). Unblocks [JPERF-917].
+
+[JPERF-917]: https://ecosystem.atlassian.net/browse/JPERF-917
 
 ### Added
 - Extend `AWSCredentialsProviderChain` with `STSAssumeRoleWithWebIdentitySessionCredentialsProvider` to enable using OIDC token. Resolves [JPERF-916].
