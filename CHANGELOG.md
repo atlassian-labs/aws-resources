@@ -23,6 +23,10 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.11.2
 
+### Added
+- Add `Aws.sts`.
+- Add `Aws.callerIdentity`.
+
 ## [1.11.2] - 2023-03-07
 [1.11.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.11.2%0Drelease-1.11.1
 
