@@ -29,6 +29,7 @@
         "ec2:RevokeSecurityGroupIngress",
         "ec2:TerminateInstances",
         "iam:AddRoleToInstanceProfile",
+        "iam:AttachRolePolicy",
         "iam:CreateInstanceProfile",
         "iam:CreateRole",
         "iam:DeleteInstanceProfile",
