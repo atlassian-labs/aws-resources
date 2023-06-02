@@ -26,6 +26,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ### Added
 - Add `Aws.sts`.
 - Add `Aws.callerIdentity`.
+- Document required IAM policy in `resources/iam-policy.json`.
 
 ## [1.11.2] - 2023-03-07
 [1.11.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.11.2%0Drelease-1.11.1
