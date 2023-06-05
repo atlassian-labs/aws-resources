@@ -28,6 +28,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 - Add `Aws.callerIdentity`.
 - Document required IAM policy in `resources/iam-policy.json`.
 
+### Fixed
+- Make our implementations of `AmiTiebreaker` predictable even when AMI creation dates are equal. Fix [JPERF-1153].
+
+[JPERF-1153]: https://ecosystem.atlassian.net/browse/JPERF-1153
+
 ## [1.11.2] - 2023-03-07
 [1.11.2]: https://bitbucket.org/atlassian/aws-resources/branches/compare/release-1.11.2%0Drelease-1.11.1
 

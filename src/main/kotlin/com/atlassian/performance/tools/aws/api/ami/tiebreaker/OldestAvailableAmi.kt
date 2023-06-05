@@ -8,7 +8,7 @@ class OldestAvailableAmi : AmiTiebreaker {
         return amis
             .asSequence()
             .filter { ImageState.fromValue(it.state) == ImageState.Available }
-            .sortedBy { it.creationDate }
+            .sortedBy { it.creationDate + it.imageId }
             .firstOrNull()
     }
 }

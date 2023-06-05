@@ -10,7 +10,7 @@ class NewestPendingAmi : AmiTiebreaker {
         return amis
             .asSequence()
             .filter { ImageState.fromValue(it.state) in listOf(Available, Pending) }
-            .sortedByDescending { it.creationDate }
+            .sortedByDescending { it.creationDate + it.imageId }
             .firstOrNull()
     }
 }
