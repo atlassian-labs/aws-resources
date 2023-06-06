@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://bitbucket.org/atlassian/aws-resources/branches/compare/master%0Drelease-1.11.2
+[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.0...master
+
+## [1.12.0] - 2023-06-06
+[1.12.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.11.2...release-1.12.0
 
 ### Added
 - Add `Aws.sts`.
