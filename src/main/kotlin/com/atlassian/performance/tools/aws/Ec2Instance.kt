@@ -21,4 +21,6 @@ internal class Ec2Instance(
     override fun release(): CompletableFuture<*> {
         return terminationBatchingEc2.terminate(instance.instanceId)
     }
+
+    override fun toString() = "Ec2Instance(instanceId = ${instance.instanceId})"
 }
