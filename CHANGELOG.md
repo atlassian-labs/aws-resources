@@ -25,6 +25,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 
 ### Fixed
 - Print EC2 instance ID in "failed to release itself" error message. 
+- Increase cleanup timeout for `Ec2Instance`. Fix [JPERF-1216].
+
+[JPERF-1216]: https://ecosystem.atlassian.net/browse/JPERF-1216
 
 ## [1.12.0] - 2023-06-06
 [1.12.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.11.2...release-1.12.0

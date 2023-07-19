@@ -63,7 +63,7 @@ class ConcurrentHousekeeping(
 
     class Builder {
         private var stackTimeout: Duration = Duration.ofMinutes(5)
-        private var instanceTimeout: Duration = Duration.ofMinutes(2)
+        private var instanceTimeout: Duration = Duration.ofMinutes(4)
         private var amiTimeout: Duration = Duration.ofMinutes(2)
 
         fun stackTimeout(stackTimeout: Duration) = apply { this.stackTimeout = stackTimeout }
