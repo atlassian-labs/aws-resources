@@ -118,4 +118,20 @@ class StorageIT {
         // then
         assertThat(downloadAlpha.toFile().list()).containsExactly("alpha.txt")
     }
+
+    @Test
+    fun shouldDetectContent(@TempDir folder: Path) {
+        // given
+        folder.resolve("text.txt").toFile().also { it.createNewFile() }
+        val storage = aws.resultsStorage(randomUUID().toString())
+
+        // when
+        val hasContentBefore = storage.hasContent()
+        storage.upload(folder.toFile())
+        val hasContentAfter = storage.hasContent()
+
+        // then
+        assertThat(hasContentBefore).`as`("had content before").isFalse()
+        assertThat(hasContentAfter).`as`("has content after").isTrue()
+    }
 }

@@ -124,4 +124,8 @@ data class Storage(
             stream.copy(leafTarget)
         }
     }
+
+    fun hasContent(): Boolean {
+        return false
+    }
 }
