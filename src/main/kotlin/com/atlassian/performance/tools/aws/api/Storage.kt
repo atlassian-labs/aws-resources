@@ -23,6 +23,19 @@ data class Storage(
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
+    private val fixedPrefix = "$prefix/"
+
+    /**
+     * Still uses [prefix] instead of [fixedPrefix], because it's used like:
+     * ```
+     * ${location.uri}/remote.txt
+     * ```
+     * It could lead to errors like:
+     * ```
+     * Failed to download aws-resources-test-00f82558-93b2-4e28-92da-d4b22d8dc053//remote.txt despite 2 attempts
+     * ```
+     * We'd need to find a deprecation path to roll out the correct trailing slash.
+     */
     val uri: URI = URI("s3", "//$bucketName/$prefix", null)
     val location = StorageLocation(uri, Regions.fromName(s3.regionName))
 
@@ -32,7 +45,7 @@ data class Storage(
         upload(
             file = file,
             bucketName = bucketName,
-            prefix = prefix
+            prefix = fixedPrefix
         )
     }
 
@@ -44,11 +57,11 @@ data class Storage(
         if (file.isDirectory) {
             Files.newDirectoryStream(file.toPath()).use {
                 it.forEach {
-                    uploadRecursively(it.toFile(), bucketName, "$prefix/${it.fileName}")
+                    uploadRecursively(it.toFile(), bucketName, "$prefix${it.fileName}")
                 }
             }
         } else {
-            val fileKey = "$prefix/${file.name}"
+            val fileKey = "$fixedPrefix${file.name}"
             logger.debug("Uploading $file to $bucketName under $fileKey")
             s3.putObject(bucketName, fileKey, file)
         }
@@ -79,7 +92,7 @@ data class Storage(
             val listing = s3.listObjectsV2(
                 ListObjectsV2Request()
                     .withBucketName(bucketName)
-                    .withPrefix(prefix)
+                    .withPrefix(fixedPrefix)
                     .withContinuationToken(token)
             )
             download(listing, rootTarget)
@@ -115,7 +128,7 @@ data class Storage(
         key: String,
         rootTarget: Path
     ) {
-        val path = key.removePrefix("$prefix/")
+        val path = key.removePrefix(fixedPrefix)
         val leafTarget = rootTarget.resolve(path)
         logger.debug("Downloading $bucketName/$key into $leafTarget")
         s3.getObject(bucketName, key).objectContent.use { stream ->

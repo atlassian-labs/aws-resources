@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.1...master
 
+### Fixed
+- Stop confusing `Storage`s with common prefix. Fix [JPERF-1272].
+
+[JPERF-1272]: https://ecosystem.atlassian.net/browse/JPERF-1272
+
 ## [1.12.1] - 2023-07-24
 [1.12.1]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.0...release-1.12.1
 
