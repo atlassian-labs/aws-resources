@@ -1,6 +1,7 @@
 package com.atlassian.performance.tools.aws.api
 
 import com.atlassian.performance.tools.aws.IntegrationTestRuntime
+import com.atlassian.performance.tools.io.api.ensureDirectory
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.assertj.core.api.Assertions.assertThat
@@ -47,9 +48,10 @@ class StorageIT {
     }
 
     @Test
-    fun shouldUploadAndDownloadSymmetrically(@TempDir upload: Path, @TempDir download: Path) {
-        val subfolder = upload.resolve("subfolder")
-        subfolder.toFile().mkdir()
+    fun shouldUploadAndDownloadSymmetrically(@TempDir folder: Path) {
+        val upload = folder.resolve("upload").ensureDirectory()
+        val download = folder.resolve("download").ensureDirectory()
+        val subfolder = upload.resolve("subfolder").ensureDirectory()
         val file = subfolder.resolve("testfile.txt")
         file.toFile().createNewFile()
         val nonce = "StorageTest.shouldUploadAndDownloadSymmetrically.${UUID.randomUUID()}"
@@ -63,7 +65,10 @@ class StorageIT {
     }
 
     @Test
-    fun shouldBeAbleToCacheResults(@TempDir upload: Path, @TempDir download: Path, @TempDir cache: Path) {
+    fun shouldBeAbleToCacheResults(@TempDir folder: Path) {
+        val upload = folder.resolve("upload").ensureDirectory()
+        val download = folder.resolve("download").ensureDirectory()
+        val cache = folder.resolve("cache").ensureDirectory()
         val file = upload.resolve("testfile.txt").toFile()
         file.createNewFile()
         val nonce = "StorageTest.shouldBeAbleToCacheResults.${UUID.randomUUID()}"
