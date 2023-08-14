@@ -125,6 +125,9 @@ data class Storage(
         }
     }
 
+    /**
+     * @since 1.13.0
+     */
     fun hasContent(): Boolean {
         val listRequest = ListObjectsV2Request()
             .withBucketName(bucketName)

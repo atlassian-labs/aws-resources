@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.2...master
+[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...master
+
+## [1.13.0] - 2023-08-14
+[1.13.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.2...release-1.13.0
 
 ### Added
 - Add `Storage.hasContent`.
@@ -30,6 +33,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 [1.12.2]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.1...release-1.12.2
 
 Accidentally released `Storage.hasContent` without SemVer minor release.
+Use 1.13.0 instead if you want to rely on the new API.
 
 ### Fixed
 - Stop confusing `Storage`s with common prefix. Fix [JPERF-1272].
