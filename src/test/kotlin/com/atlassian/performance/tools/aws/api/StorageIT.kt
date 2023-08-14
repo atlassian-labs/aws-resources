@@ -85,4 +85,24 @@ class StorageIT {
         assertThat(cachedResults.list()).isEqualTo(upload.toFile().list())
         assertThat(cachedResults.list()).isEqualTo(download.toFile().list())
     }
+
+    @Test
+    fun shouldNotMixPrefixes(@TempDir folder: Path) {
+        val uploadAlpha = folder.resolve("uploadAlpha").ensureDirectory()
+        val uploadBeta = folder.resolve("uploadBeta").ensureDirectory()
+        val downloadAlpha = folder.resolve("downloadAlpha").ensureDirectory()
+        uploadAlpha.resolve("alpha.txt").toFile().also { it.createNewFile() }
+        uploadBeta.resolve("beta.txt").toFile().also { it.createNewFile() }
+        val nonce = "shouldNotMixPrefixes-${UUID.randomUUID()}"
+        val storageAlpha = IntegrationTestRuntime.aws.resultsStorage("$nonce/sample-1")
+        val storageBeta = IntegrationTestRuntime.aws.resultsStorage("$nonce/sample-10")
+
+        // when
+        storageAlpha.upload(uploadAlpha.toFile())
+        storageBeta.upload(uploadBeta.toFile())
+        storageAlpha.download(downloadAlpha).toFile()
+
+        // then
+        assertThat(downloadAlpha.toFile().list()).containsExactly("alpha.txt")
+    }
 }
