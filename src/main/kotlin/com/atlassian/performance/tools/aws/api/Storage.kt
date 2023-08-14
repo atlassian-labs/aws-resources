@@ -126,6 +126,10 @@ data class Storage(
     }
 
     fun hasContent(): Boolean {
-        return s3.listObjectsV2(bucketName, dirPrefix).objectSummaries.isNotEmpty()
+        val listRequest = ListObjectsV2Request()
+            .withBucketName(bucketName)
+            .withPrefix(dirPrefix)
+            .withMaxKeys(1)
+        return s3.listObjectsV2(listRequest).objectSummaries.isNotEmpty()
     }
 }
