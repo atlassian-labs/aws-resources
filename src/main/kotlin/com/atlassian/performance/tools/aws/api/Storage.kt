@@ -11,10 +11,11 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
+import java.nio.file.Files.newDirectoryStream
 import java.nio.file.Path
 import java.time.Duration
 
+@Suppress("LoggingStringTemplateAsArgument")
 data class Storage(
     private val s3: AmazonS3,
     private val prefix: String,
@@ -23,10 +24,10 @@ data class Storage(
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
-    private val fixedPrefix = "$prefix/"
+    private val dirPrefix = "$prefix/"
 
     /**
-     * Still uses [prefix] instead of [fixedPrefix], because it's used like:
+     * Still uses [prefix] instead of [dirPrefix], because it's used like:
      * ```
      * ${location.uri}/remote.txt
      * ```
@@ -42,26 +43,14 @@ data class Storage(
     fun upload(
         file: File
     ) {
-        upload(
-            file = file,
-            bucketName = bucketName,
-            prefix = fixedPrefix
-        )
-    }
-
-    private fun upload(
-        file: File,
-        bucketName: String,
-        prefix: String
-    ) {
         if (file.isDirectory) {
-            Files.newDirectoryStream(file.toPath()).use {
-                it.forEach {
-                    uploadRecursively(it.toFile(), bucketName, "$prefix${it.fileName}")
+            newDirectoryStream(file.toPath()).use { files ->
+                files.forEach {
+                    uploadRecursively(it.toFile(), bucketName, dirPrefix + it.fileName)
                 }
             }
         } else {
-            val fileKey = "$fixedPrefix${file.name}"
+            val fileKey = dirPrefix + file.name
             logger.debug("Uploading $file to $bucketName under $fileKey")
             s3.putObject(bucketName, fileKey, file)
         }
@@ -73,8 +62,8 @@ data class Storage(
         key: String
     ) {
         if (file.isDirectory) {
-            Files.newDirectoryStream(file.toPath()).use {
-                it.forEach {
+            newDirectoryStream(file.toPath()).use { files ->
+                files.forEach {
                     uploadRecursively(it.toFile(), bucketName, "$key/${it.fileName}")
                 }
             }
@@ -92,7 +81,7 @@ data class Storage(
             val listing = s3.listObjectsV2(
                 ListObjectsV2Request()
                     .withBucketName(bucketName)
-                    .withPrefix(fixedPrefix)
+                    .withPrefix(dirPrefix)
                     .withContinuationToken(token)
             )
             download(listing, rootTarget)
@@ -108,13 +97,13 @@ data class Storage(
         listing
             .objectSummaries
             .map { it.key }
-            .map {
-                IdempotentAction("download $it") {
-                    downloadObject(it, rootTarget)
+            .map { key ->
+                IdempotentAction("download $key") {
+                    downloadObject(key, rootTarget)
                 }
             }
-            .forEach {
-                it.retry(
+            .forEach { download ->
+                download.retry(
                     maxAttempts = 2,
                     backoff = ExponentialBackoff(
                         baseBackoff = Duration.ofSeconds(5),
@@ -128,7 +117,7 @@ data class Storage(
         key: String,
         rootTarget: Path
     ) {
-        val path = key.removePrefix(fixedPrefix)
+        val path = key.removePrefix(dirPrefix)
         val leafTarget = rootTarget.resolve(path)
         logger.debug("Downloading $bucketName/$key into $leafTarget")
         s3.getObject(bucketName, key).objectContent.use { stream ->
