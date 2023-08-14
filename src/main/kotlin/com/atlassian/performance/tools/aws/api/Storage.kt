@@ -126,6 +126,6 @@ data class Storage(
     }
 
     fun hasContent(): Boolean {
-        return false
+        return s3.listObjectsV2(bucketName, dirPrefix).objectSummaries.isNotEmpty()
     }
 }

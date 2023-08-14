@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.1...master
 
+### Added
+- Add `Storage.hasContent`.
+
 ### Fixed
 - Stop confusing `Storage`s with common prefix. Fix [JPERF-1272].
 
