@@ -4,6 +4,8 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ListObjectsV2Request
 import com.amazonaws.services.s3.model.ListObjectsV2Result
+import com.amazonaws.services.s3.transfer.TransferManager
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder
 import com.atlassian.performance.tools.io.api.copy
 import com.atlassian.performance.tools.jvmtasks.api.ExponentialBackoff
 import com.atlassian.performance.tools.jvmtasks.api.IdempotentAction
@@ -17,10 +19,21 @@ import java.time.Duration
 
 @Suppress("LoggingStringTemplateAsArgument")
 data class Storage(
-    private val s3: AmazonS3,
+    private val transfer: TransferManager,
     private val prefix: String,
     private val bucketName: String
 ) {
+    @Deprecated(
+        message = "Use the constructor with transfer instead",
+        replaceWith = ReplaceWith("Storage(transfer, prefix, bucketName)")
+    )
+    constructor(
+        s3: AmazonS3,
+        prefix: String,
+        bucketName: String
+    ) : this(
+        TransferManagerBuilder.standard().withS3Client(s3).build(), prefix, bucketName
+    )
 
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
@@ -37,12 +50,10 @@ data class Storage(
      * ```
      * We'd need to find a deprecation path to roll out the correct trailing slash.
      */
-    val uri: URI = URI("s3", "//$bucketName/$prefix", null)
-    val location = StorageLocation(uri, Regions.fromName(s3.regionName))
+    private val uri: URI = URI("s3", "//$bucketName/$prefix", null)
+    val location = StorageLocation(uri, Regions.fromName(transfer.amazonS3Client.regionName))
 
-    fun upload(
-        file: File
-    ) {
+    fun upload(file: File) {
         if (file.isDirectory) {
             newDirectoryStream(file.toPath()).use { files ->
                 files.forEach {
@@ -52,7 +63,9 @@ data class Storage(
         } else {
             val fileKey = dirPrefix + file.name
             logger.debug("Uploading $file to $bucketName under $fileKey")
-            s3.putObject(bucketName, fileKey, file)
+            transfer.upload(bucketName, fileKey, file).apply {
+                waitForCompletion()
+            }
         }
     }
 
@@ -69,7 +82,9 @@ data class Storage(
             }
         } else {
             logger.debug("Uploading $file to $bucketName under $key")
-            s3.putObject(bucketName, key, file)
+            transfer.upload(bucketName, key, file).apply {
+                waitForCompletion()
+            }
         }
     }
 
@@ -78,7 +93,7 @@ data class Storage(
     ): Path {
         var token: String? = null
         do {
-            val listing = s3.listObjectsV2(
+            val listing = transfer.amazonS3Client.listObjectsV2(
                 ListObjectsV2Request()
                     .withBucketName(bucketName)
                     .withPrefix(dirPrefix)
@@ -120,7 +135,7 @@ data class Storage(
         val path = key.removePrefix(dirPrefix)
         val leafTarget = rootTarget.resolve(path)
         logger.debug("Downloading $bucketName/$key into $leafTarget")
-        s3.getObject(bucketName, key).objectContent.use { stream ->
+        transfer.amazonS3Client.getObject(bucketName, key).objectContent.use { stream ->
             stream.copy(leafTarget)
         }
     }
@@ -133,6 +148,6 @@ data class Storage(
             .withBucketName(bucketName)
             .withPrefix(dirPrefix)
             .withMaxKeys(1)
-        return s3.listObjectsV2(listRequest).objectSummaries.isNotEmpty()
+        return transfer.amazonS3Client.listObjectsV2(listRequest).objectSummaries.isNotEmpty()
     }
 }

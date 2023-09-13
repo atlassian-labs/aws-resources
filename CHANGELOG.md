@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...master
 
+### Added
+- Add a new constructor for `Storage` that takes a `TransferManager` as a parameter. Deprecate the old constructor.
+
 ## [1.13.0] - 2023-08-14
 [1.13.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.2...release-1.13.0
 

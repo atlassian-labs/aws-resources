@@ -9,6 +9,7 @@ import com.amazonaws.services.identitymanagement.model.ListAttachedRolePoliciesR
 import com.amazonaws.services.identitymanagement.model.ListRolePoliciesRequest
 import com.amazonaws.services.s3.model.DeleteObjectsRequest
 import com.amazonaws.services.s3.model.MultiObjectDeleteException
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder
 import com.atlassian.performance.tools.aws.api.Investment.TagKeys.bambooBuildKey
 import com.atlassian.performance.tools.aws.api.Investment.TagKeys.lifespanKey
 import com.atlassian.performance.tools.aws.api.Investment.TagKeys.userKey
@@ -65,7 +66,7 @@ class ProvisionedStack(
         logicalBucketName: String,
         prefix: String
     ) = Storage(
-        s3 = aws.s3,
+        transfer = TransferManagerBuilder.standard().withS3Client(aws.s3).build(),
         prefix = prefix,
         bucketName = findLogicalResource("AWS::S3::Bucket", logicalBucketName)
     )
