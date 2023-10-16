@@ -23,6 +23,11 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...master
 
+### Fixed
+- Add missing `iam:GetRole` permission. You have to update the policy manually. Fix [JPERF-1407].
+
+[JPERF-1407]: https://ecosystem.atlassian.net/browse/JPERF-1407
+
 ## [1.13.0] - 2023-08-14
 [1.13.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.12.2...release-1.13.0
 
