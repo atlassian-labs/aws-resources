@@ -49,6 +49,10 @@
         "s3:GetObject",
         "s3:ListBucket",
         "s3:PutObject",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketPolicy",
+        "s3:DeleteBucketPolicy",
+        "s3:PutLifecycleConfiguration",
         "sts:GetCallerIdentity",
         "support:CreateCase"
       ],

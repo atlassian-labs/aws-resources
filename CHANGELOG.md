@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...master
 
+### Added
+- Add permissions for managing s3 bucket policies and lifecycle configurations.
+
 ### Fixed
 - Add missing `iam:GetRole` permission. You have to update the policy manually. Fix [JPERF-1407].
 
