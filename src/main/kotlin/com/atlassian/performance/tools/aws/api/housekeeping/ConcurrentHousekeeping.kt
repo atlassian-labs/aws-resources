@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager
 import java.time.Duration
 import java.time.Instant.now
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
 
 class ConcurrentHousekeeping(
     private val stackTimeout: Duration,
@@ -17,8 +18,9 @@ class ConcurrentHousekeeping(
     private val logger = LogManager.getLogger(this::class.java)
 
     override fun cleanLeftovers(aws: Aws) {
-        val stacks = Cloudformation(aws, aws.cloudformation).listExpiredStacks()
-        waitUntilReleased(stacks, stackTimeout)
+        Cloudformation(aws, aws.cloudformation).consumeExpiredStacks(Consumer { stacks ->
+            waitUntilReleased(stacks, stackTimeout)
+        })
 
         val instances = Ec2(aws.ec2).listExpiredInstances()
         waitUntilReleased(instances, instanceTimeout)
