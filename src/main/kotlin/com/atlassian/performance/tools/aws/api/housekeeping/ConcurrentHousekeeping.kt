@@ -18,10 +18,6 @@ class ConcurrentHousekeeping(
     private val logger = LogManager.getLogger(this::class.java)
 
     override fun cleanLeftovers(aws: Aws) {
-        Cloudformation(aws, aws.cloudformation).consumeExpiredStacks(Consumer { stacks ->
-            waitUntilReleased(stacks, stackTimeout)
-        })
-
         Ec2(aws.ec2).consumeExpiredInstances(Consumer { instances ->
             waitUntilReleased(instances, instanceTimeout)
         })
@@ -39,6 +35,10 @@ class ConcurrentHousekeeping(
 
         waitUntilReleased(keys)
         waitUntilReleased(securityGroups)
+
+        Cloudformation(aws, aws.cloudformation).consumeExpiredStacks(Consumer { stacks ->
+            waitUntilReleased(stacks, stackTimeout)
+        })
     }
 
     private fun waitUntilReleased(
