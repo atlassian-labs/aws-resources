@@ -57,7 +57,7 @@ class ConcurrentHousekeeping(
         if (!resource.isExpired()) {
             throw Exception("You can't release $resource. It hasn't expired.")
         }
-        return resource.release().handle { throwable, _ ->
+        return resource.release().handle { _, throwable: Throwable? ->
             if (throwable != null) {
                 logger.error("$resource failed to release itself", throwable)
             }
