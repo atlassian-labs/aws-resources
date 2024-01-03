@@ -7,25 +7,23 @@ import com.atlassian.performance.tools.aws.api.Aws
 import com.atlassian.performance.tools.aws.api.Investment
 import com.atlassian.performance.tools.aws.api.ProvisionedStack
 import com.atlassian.performance.tools.aws.api.ScrollingCloudformation
+import java.util.function.Consumer
 
 internal class Cloudformation(
     private val aws: Aws,
     private val cloudformation: AmazonCloudFormation
 ) {
-    fun listExpiredStacks(): List<ProvisionedStack> {
+    fun consumeExpiredStacks(call: Consumer<List<ProvisionedStack>>) {
         val cleanStackStatuses = listOf(
             StackStatus.DELETE_COMPLETE,
             StackStatus.DELETE_IN_PROGRESS
         )
-        val scrollingCloudformation = ScrollingCloudformation(cloudformation)
-        val stacks = mutableListOf<ProvisionedStack>()
-        scrollingCloudformation.scrollThroughStacks { stackBatch ->
-            stackBatch
+        ScrollingCloudformation(cloudformation).scrollThroughStacks { stackBatch ->
+            val expiredStacks = stackBatch
                 .filter { StackStatus.fromValue(it.stackStatus) !in cleanStackStatuses }
-                .forEach { stacks += ProvisionedStack(it, aws) }
-        }
-        return stacks.filter {
-            it.isExpired()
+                .map { ProvisionedStack(it, aws) }
+                .filter { it.isExpired() }
+            call.accept(expiredStacks)
         }
     }
 

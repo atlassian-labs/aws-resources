@@ -6,10 +6,12 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksResult
 import com.amazonaws.services.cloudformation.model.Stack
 import com.atlassian.performance.tools.aws.api.Tag
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.time.Duration.ofMinutes
 import java.time.Instant.now
 import java.util.*
+import java.util.function.Consumer
 
 class CloudformationTest {
     private val awsMock = FakeAws.awsForUnitTests()
@@ -21,9 +23,9 @@ class CloudformationTest {
         )
         val cloudformation = Cloudformation(awsMock, CloudformationMock(stacks))
 
-        val expiredStacks = cloudformation.listExpiredStacks()
-
-        assertThat(expiredStacks).isEmpty()
+        cloudformation.consumeExpiredStacks(Consumer { expiredStacks ->
+            assertThat(expiredStacks).isEmpty()
+        })
     }
 
     @Test
@@ -40,9 +42,9 @@ class CloudformationTest {
         )
         val cloudformation = Cloudformation(awsMock, CloudformationMock(stacks))
 
-        val expiredStacks = cloudformation.listExpiredStacks()
-
-        assertThat(expiredStacks).hasSize(1)
+        cloudformation.consumeExpiredStacks(Consumer { expiredStacks ->
+            assertThat(expiredStacks).hasSize(1)
+        })
     }
 
     @Test
@@ -58,9 +60,9 @@ class CloudformationTest {
         )
         val cloudformation = Cloudformation(awsMock, CloudformationMock(stacks))
 
-        val expiredStacks = cloudformation.listExpiredStacks()
-
-        assertThat(expiredStacks).isEmpty()
+        cloudformation.consumeExpiredStacks(Consumer { expiredStacks ->
+            assertThat(expiredStacks).isEmpty()
+        })
     }
 
     private class CloudformationMock(
