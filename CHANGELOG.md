@@ -30,6 +30,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 - Add missing `iam:GetRole` permission. You have to update the policy manually. Fix [JPERF-1407].
 - Reduce pressure on CloudFormation when cleaning long lists of expired stacks. Help [JPERF-1332].
 - Clean up EC2 security groups before CloudFormation stacks. Fix [JPERF-1208].
+- Fix housekeeping fail logging.
 
 [JPERF-1407]: https://ecosystem.atlassian.net/browse/JPERF-1407
 [JPERF-1332]: https://ecosystem.atlassian.net/browse/JPERF-1332
