@@ -25,15 +25,14 @@ class ConcurrentHousekeeping(
         val amis = Ec2(aws.ec2).listExpiredAmis()
         waitUntilReleased(amis, amiTimeout)
 
-        val keys = aws.ec2.describeKeyPairs().keyPairs.map { key ->
-            RemoteSshKey(SshKeyName(key.keyName), aws.ec2)
-        }.filter { it.isExpired() }
+        aws.ec2.describeKeyPairs().keyPairs
+            .map { key -> RemoteSshKey(SshKeyName(key.keyName), aws.ec2) }
+            .filter { it.isExpired() }
+            .forEach { it.release().get() }
 
         val securityGroups = aws.ec2.describeSecurityGroups().securityGroups.map { securityGroup ->
             Ec2SecurityGroup(securityGroup, aws.ec2)
         }.filter { it.isExpired() }
-
-        waitUntilReleased(keys)
         waitUntilReleased(securityGroups)
 
         Cloudformation(aws, aws.cloudformation).consumeExpiredStacks(Consumer { stacks ->
