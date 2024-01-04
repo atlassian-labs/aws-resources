@@ -22,8 +22,9 @@ class ConcurrentHousekeeping(
             waitUntilReleased(stacks, stackTimeout)
         })
 
-        val instances = Ec2(aws.ec2).listExpiredInstances()
-        waitUntilReleased(instances, instanceTimeout)
+        Ec2(aws.ec2).consumeExpiredInstances(Consumer { instances ->
+            waitUntilReleased(instances, instanceTimeout)
+        })
 
         val amis = Ec2(aws.ec2).listExpiredAmis()
         waitUntilReleased(amis, amiTimeout)
