@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...master
+[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.14.0...master
+
+## [1.14.0] - 2024-01-04
+[1.14.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...release-1.14.0
 
 ### Added
 - Add permissions for managing s3 bucket policies and lifecycle configurations.
