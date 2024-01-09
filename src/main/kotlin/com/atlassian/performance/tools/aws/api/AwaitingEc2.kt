@@ -98,13 +98,10 @@ class AwaitingEc2(
         investment: Investment,
         request: CreateSecurityGroupRequest
     ): SecurityGroup {
-        val securityGroup = allocateSecurityGroup(request)
-        ec2.createTags(
-            CreateTagsRequest()
-                .withTags(investment.tag().map { it.toEc2() })
-                .withResources(securityGroup.groupId)
-        )
-        return securityGroup
+        val tagSpec = TagSpecification()
+            .withTags(investment.tag().map { it.toEc2() })
+            .withResourceType(ResourceType.SecurityGroup)
+        return allocateSecurityGroup(request.withTagSpecifications(tagSpec))
     }
 
     private fun allocateSecurityGroup(
