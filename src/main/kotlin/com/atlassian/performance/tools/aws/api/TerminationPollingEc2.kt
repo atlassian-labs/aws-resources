@@ -58,9 +58,9 @@ class TerminationPollingEc2(
             logger.debug("No instances to poll")
             return
         }
-        val instanceIds = polls.keys.toList()
+        val instanceIds = polls.keys.take(200)
         logger.debug("Polling $instanceIds")
-        val foundInstanceIds = mutableListOf<String>()
+        val foundInstanceIds = mutableSetOf<String>()
         scrollingEc2.scrollThroughInstances(
             Filter("instance-id", instanceIds)
         ) { instanceBatch ->
