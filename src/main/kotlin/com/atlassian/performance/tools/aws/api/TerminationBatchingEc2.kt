@@ -55,7 +55,7 @@ class TerminationBatchingEc2(
             logger.trace("No instances to terminate")
             return
         }
-        val instanceIds = terminations.keys
+        val instanceIds = terminations.keys.take(1000)
         logger.debug("Starting batch termination of $instanceIds")
         ec2.terminateInstances(TerminateInstancesRequest().withInstanceIds(instanceIds))
         instanceIds.forEach { instanceId ->

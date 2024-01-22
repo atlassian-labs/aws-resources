@@ -33,7 +33,7 @@ class ConcurrentHousekeeping(
         val securityGroups = aws.ec2.describeSecurityGroups().securityGroups.map { securityGroup ->
             Ec2SecurityGroup(securityGroup, aws.ec2)
         }.filter { it.isExpired() }
-        waitUntilReleased(securityGroups)
+        waitUntilReleased(securityGroups, Duration.ofMinutes(3))
 
         Cloudformation(aws, aws.cloudformation).consumeExpiredStacks(Consumer { stacks ->
             waitUntilReleased(stacks, stackTimeout)
