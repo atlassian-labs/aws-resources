@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
 /**
- * @since v1.10.1
+ * @since 1.10.1
  */
 class TiebreakingAmiCache private constructor(
     private val tiebreaker: AmiTiebreaker

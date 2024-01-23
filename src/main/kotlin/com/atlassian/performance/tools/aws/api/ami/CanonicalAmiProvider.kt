@@ -5,7 +5,7 @@ import com.atlassian.performance.tools.aws.api.Aws
 import com.atlassian.performance.tools.aws.api.CanonicalImageIdByNameResolver
 
 /**
- * @since v1.10.1
+ * @since 1.10.1
  */
 class CanonicalAmiProvider private constructor(
     private val imageName: String,
