@@ -26,6 +26,7 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ### Fixed
 - Tag security groups atomically when created.
 - Respect AWS request size limits in `TerminationBatchingEc2` and `TerminationPollingEc2`.
+- Extend `ConcurrentHousekeeping` instance timeout.
 
 ## [1.14.0] - 2024-01-04
 [1.14.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.13.0...release-1.14.0

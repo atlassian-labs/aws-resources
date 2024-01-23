@@ -42,7 +42,7 @@ class ConcurrentHousekeeping(
 
     private fun waitUntilReleased(
         resources: List<Resource>,
-        timeout: Duration = Duration.ofSeconds(15)
+        timeout: Duration
     ) {
         val deadline = now() + timeout
         resources
@@ -65,7 +65,7 @@ class ConcurrentHousekeeping(
 
     class Builder {
         private var stackTimeout: Duration = Duration.ofMinutes(5)
-        private var instanceTimeout: Duration = Duration.ofMinutes(4)
+        private var instanceTimeout: Duration = Duration.ofMinutes(8)
         private var amiTimeout: Duration = Duration.ofMinutes(2)
 
         fun stackTimeout(stackTimeout: Duration) = apply { this.stackTimeout = stackTimeout }
