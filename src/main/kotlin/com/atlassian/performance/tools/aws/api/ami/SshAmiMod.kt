@@ -19,7 +19,7 @@ import java.time.Duration
 import java.util.*
 
 /**
- * @since v1.10.1
+ * @since 1.10.1
  */
 class SshAmiMod private constructor(
     private val sshInstanceMod: SshInstanceMod,

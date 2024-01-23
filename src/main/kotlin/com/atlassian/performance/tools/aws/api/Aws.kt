@@ -398,10 +398,13 @@ class Aws private constructor(
 
         /**
          * @param [amiProvider] A way to choose the default AMI.
-         * @since v1.10.1
+         * @since 1.10.1
          */
         fun amiProvider(amiProvider: AmiProvider): Builder = apply { this.amiProvider = amiProvider }
 
+        /**
+         * @since 1.15.0
+         */
         fun housekeeping(housekeeping: Housekeeping): Builder = apply { this.housekeeping = housekeeping }
 
         /**
