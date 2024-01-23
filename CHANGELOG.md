@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.14.0...master
 
+### Added
+- Add `Aws.Builder.housekeeping`
+
 ### Fixed
 - Tag security groups atomically when created.
 - Respect AWS request size limits in `TerminationBatchingEc2` and `TerminationPollingEc2`.

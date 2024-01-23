@@ -402,12 +402,14 @@ class Aws private constructor(
          */
         fun amiProvider(amiProvider: AmiProvider): Builder = apply { this.amiProvider = amiProvider }
 
+        fun housekeeping(housekeeping: Housekeeping): Builder = apply { this.housekeeping = housekeeping }
+
         /**
          * @param [managedPolicyArns] A way to attach additional managed policies to [shortTermStorage].
          */
-
         fun managedPolicyArns(managedPolicyArns: List<String>): Builder =
             apply { this.managedPolicyArns = managedPolicyArns }
+
 
         fun build(): Aws = Aws(
             region = region,
