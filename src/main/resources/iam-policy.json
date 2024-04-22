@@ -43,6 +43,7 @@
         "iam:PassRole",
         "iam:PutRolePolicy",
         "iam:RemoveRoleFromInstanceProfile",
+        "iam:TagRole",
         "s3:CreateBucket",
         "s3:DeleteBucket",
         "s3:DeleteObject",
