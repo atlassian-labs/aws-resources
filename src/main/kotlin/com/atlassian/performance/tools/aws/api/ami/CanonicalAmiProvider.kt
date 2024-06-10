@@ -49,10 +49,15 @@ class CanonicalAmiProvider private constructor(
             this.imageName = imageName
         }
 
-        fun focal(): Builder {
-            avoidUnattendedUpgrades = true
-            return imageName(focal)
+        /**
+         * Make sure your [imageName] is Focal or newer.
+         */
+        fun avoidUnattendedUpgrades() = apply {
+            this.avoidUnattendedUpgrades = true
         }
+
+        fun focal() = imageName(focal)
+            .avoidUnattendedUpgrades()
 
         fun build(): CanonicalAmiProvider = CanonicalAmiProvider(imageName, avoidUnattendedUpgrades)
     }
