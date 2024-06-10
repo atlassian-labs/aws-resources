@@ -21,10 +21,14 @@ class CanonicalImageIdByNameResolver private constructor(
             )
         )
         .images
-        .sortedByDescending { it.creationDate }
         .map { it.imageId }
-        .firstOrNull()
-        ?: throw Exception("Failed to find image containing $imageName in $region")
+        .let {
+            when {
+                it.isEmpty() -> throw Exception("Failed to find image $imageName in $region")
+                it.size > 1 -> throw Exception("More than one image found with name $imageName in declared region $region. Selecting any of them automatically could create a security risk, so we can't proceed")
+                else -> it.first()
+            }
+        }
 
     class Builder(
         private val ec2: AmazonEC2
