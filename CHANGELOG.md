@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.15.0...master
 
+### Added
+- Add `CanonicalAmiProvider.Builder.avoidUnattendedUpgrades` for bumping `imageName` to Focal or higher.
+
 ### Fixed
 - Bump Ubuntu Focal AMI to `ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20240531`.
   The previous one was 2 years old and disappeared: `ubuntu-focal-20.04-amd64-server-20220610`.
