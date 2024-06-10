@@ -36,7 +36,7 @@ class CanonicalImageIdByNameResolverTest {
             assertThat(savedRequest).isNotNull
             assertThat(savedRequest!!.filters).contains(
                 Filter("name", listOf(queriedImageName)),
-                Filter("owner-id", listOf(CanonicalOwnerIdRegistry.byRegion[region]))
+                Filter("owner-id", listOf(CanonicalOwnerIdRegistry.forRegion(region)))
             )
         }
     }
@@ -63,7 +63,7 @@ class CanonicalImageIdByNameResolverTest {
         assertThat(savedRequest).isNotNull
         assertThat(savedRequest!!.filters).contains(
             Filter("name", listOf(queriedImageName)),
-            Filter("owner-id", listOf(CanonicalOwnerIdRegistry.default))
+            Filter("owner-id", listOf("099720109477"))
         )
     }
 
