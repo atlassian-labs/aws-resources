@@ -107,27 +107,23 @@ class CanonicalImageIdByNameResolverTest {
     }
 
     @Test
-    fun failsWhenMoreThanOneImageIsFound() {
+    fun picksTheNewestImage() {
         val queriedImageName = "name-of-single-image"
         val ec2 = object : AmazonEC2 by FakeEc2() {
             override fun describeImages(
                 describeImagesRequest: DescribeImagesRequest?
             ) = DescribeImagesResult()
                 .withImages(
-                    Image().withImageId("id-of-image-1"),
-                    Image().withImageId("id-of-image-2")
+                    Image().withImageId("id-of-image-1").withCreationDate("2022-07-07T00:49:01.000Z"),
+                    Image().withImageId("id-of-image-2").withCreationDate("2024-03-21T22:43:23.000Z"),
+                    Image().withImageId("id-of-image-3").withCreationDate("2023-03-01T23:16:36.000Z")
                 )
         }
         val resolver = CanonicalImageIdByNameResolver.Builder(ec2)
             .build()
 
-        val result = try {
-            resolver.invoke(queriedImageName)
-            null
-        } catch (e: Exception) {
-            e
-        }
+        val result = resolver.invoke(queriedImageName)
 
-        assertThat(result).isNotNull()
+        assertThat(result).isEqualTo("id-of-image-2")
     }
 }
