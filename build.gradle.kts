@@ -81,8 +81,7 @@ fun log4j(
 }
 
 fun jaxb(): List<String> = listOf(
-    "org.glassfish.jaxb:jaxb-runtime:2.3.0",
-    "javax.activation:activation:1.1.1"
+    "org.glassfish.jaxb:jaxb-runtime:2.3.0"
 )
 
 val cleanLeftovers = task<Test>("awsCleanLeftovers")
