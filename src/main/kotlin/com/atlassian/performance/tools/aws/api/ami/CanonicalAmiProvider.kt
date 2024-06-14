@@ -51,6 +51,7 @@ class CanonicalAmiProvider private constructor(
 
         /**
          * Make sure your [imageName] is Focal or newer.
+         * @since 1.16.0
          */
         fun avoidUnattendedUpgrades() = apply {
             this.avoidUnattendedUpgrades = true

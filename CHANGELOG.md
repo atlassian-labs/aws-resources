@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.15.0...master
+[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.16.0...master
+
+## [1.16.0] - 2024-06-10
+[1.16.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.15.0...release-1.16.0
 
 ### Added
 - Add `CanonicalAmiProvider.Builder.avoidUnattendedUpgrades` for bumping `imageName` to Focal or higher.
