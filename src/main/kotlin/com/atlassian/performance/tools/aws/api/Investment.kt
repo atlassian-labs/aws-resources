@@ -12,29 +12,39 @@ import com.amazonaws.services.ec2.model.Tag as Ec2Tag
  * - value proposition
  * - cost factors
  * - accountability tracking
- *
- * @param useCase the value proposition for the investment
- * @param lifespan pessimistic estimate of the duration of the investment, higher values mean higher cost
- * @param disposable if true, then the investment can be cancelled even before [lifespan] and get its cost reduced
- * @param reuseKey if a new investment would have the same reuse key as an existing investment, the old one can be
- *                 reused, reducing the cost
  */
 data class Investment
-@Deprecated(
-    message = "Use Builder instead. Constructor will be be made private in the next major version.",
-    replaceWith = ReplaceWith(
-        expression = "Investment.Builder(useCase = useCase, lifespan = lifespan)" +
-            ".disposable(disposable)" +
-            ".reuseKey(reuseKey)" +
-            ".build()"
-    )
-)
-constructor(
+private constructor(
     private val useCase: String,
     val lifespan: Duration,
     private val disposable: Boolean = true,
-    val reuseKey: () -> String = { "jpt-${UUID.randomUUID()}" }
+    val reuseKey: () -> String = { "jpt-${UUID.randomUUID()}" },
+    private val resourceOwner: String = defaultResourceOwner
 ) {
+    /**
+     *
+     * @param useCase the value proposition for the investment
+     * @param lifespan pessimistic estimate of the duration of the investment, higher values mean higher cost
+     * @param disposable if true, then the investment can be cancelled even before [lifespan] and get its cost reduced
+     * @param reuseKey if a new investment would have the same reuse key as an existing investment, the old one can be
+     *                 reused, reducing the cost
+     */
+    @Deprecated(
+        message = "Use Builder instead. Public constructor will be be removed in the next major version.",
+        replaceWith = ReplaceWith(
+            expression = "Investment.Builder(useCase = useCase, lifespan = lifespan)" +
+                ".disposable(disposable)" +
+                ".reuseKey(reuseKey)" +
+                ".build()"
+        )
+    )
+    constructor(
+        useCase: String,
+        lifespan: Duration,
+        disposable: Boolean = true,
+        reuseKey: () -> String = { "jpt-${UUID.randomUUID()}" }
+    ) : this(useCase, lifespan, disposable, reuseKey, defaultResourceOwner)
+
     /**
      * @return tags useful for tracking accountability of the investment
      */
@@ -47,7 +57,7 @@ constructor(
         Tag("Name", "Jira Performance Tests"),
         Tag("service_name", useCase),
         Tag("business_unit", "Engineering-Server"),
-        Tag("resource_owner", "mgrzaslewicz")
+        Tag("resource_owner", resourceOwner)
     )
 
     /**
@@ -91,6 +101,7 @@ constructor(
     ) {
         private var disposable: Boolean = true
         private var reuseKey: () -> String = { "jpt-${UUID.randomUUID()}" }
+        private var resourceOwner: String = defaultResourceOwner
 
         /**
          * @param disposable if true, then the investment can be cancelled even before [lifespan] and get its cost reduced
@@ -101,13 +112,18 @@ constructor(
          *                 reused, reducing the cost
          */
         fun reuseKey(reuseKey: () -> String) = apply { this.reuseKey = reuseKey }
+        /**
+         * @param resourceOwner AWS resource owner, defaults to current Atlassian JPT maintainer
+         */
+        fun resourceOwner(resourceOwner: String) = apply { this.resourceOwner = resourceOwner }
 
         fun build(): Investment {
             return Investment(
                 useCase = useCase,
                 lifespan = lifespan,
                 disposable = disposable,
-                reuseKey = reuseKey
+                reuseKey = reuseKey,
+                resourceOwner = resourceOwner
             )
         }
     }
@@ -118,6 +134,7 @@ constructor(
         const val userKey = "os_user_name"
         const val bambooBuildKey = "bamboo_result_key"
         const val disposableKey = "disposable"
+        private const val defaultResourceOwner = "mgrzaslewicz"
 
         fun parseLifespan(
             tags: List<Tag>
