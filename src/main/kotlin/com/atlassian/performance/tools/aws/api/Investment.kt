@@ -134,7 +134,7 @@ private constructor(
         const val userKey = "os_user_name"
         const val bambooBuildKey = "bamboo_result_key"
         const val disposableKey = "disposable"
-        private const val defaultResourceOwner = "mgrzaslewicz"
+        private const val defaultResourceOwner = "jforemski"
 
         fun parseLifespan(
             tags: List<Tag>
