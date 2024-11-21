@@ -27,6 +27,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 - Add `Investment.Builder`
 - Allow overriding the resource_owner label in `Investment.Builder`
 
+### Changed
+- Changed resource_owner default label to point to current Atlassian JPT maintainer
+
 ## [1.17.0] - 2024-06-14
 [1.17.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.16.0...release-1.17.0
 
