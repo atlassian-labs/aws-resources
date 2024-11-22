@@ -32,15 +32,12 @@ class SshAmiMod private constructor(
 
     private val useCase = sshInstanceMod.useCase
 
-    private val amiInvestment = Investment(
-        useCase = useCase,
-        lifespan = amiLifespan
-    )
+    private val amiInvestment = Investment.Builder(useCase, amiLifespan).build()
     private val expectedImageSavingTime = Duration.ofMinutes(6)
-    private val instanceInvestment = Investment(
+    private val instanceInvestment = Investment.Builder(
         useCase = useCase,
         lifespan = sshInstanceMod.expectedDuration + expectedImageSavingTime
-    )
+    ).build()
 
     /**
      * If the [amiCache] finds an AMI matching [sshInstanceMod] and [amiProvider], it will be reused.

@@ -19,7 +19,17 @@ import com.amazonaws.services.ec2.model.Tag as Ec2Tag
  * @param reuseKey if a new investment would have the same reuse key as an existing investment, the old one can be
  *                 reused, reducing the cost
  */
-data class Investment(
+data class Investment
+@Deprecated(
+    message = "Use Builder instead. Constructor will be be made private in the next major version.",
+    replaceWith = ReplaceWith(
+        expression = "Investment.Builder(useCase = useCase, lifespan = lifespan)" +
+            ".disposable(disposable)" +
+            ".reuseKey(reuseKey)" +
+            ".build()"
+    )
+)
+constructor(
     private val useCase: String,
     val lifespan: Duration,
     private val disposable: Boolean = true,
@@ -62,6 +72,42 @@ data class Investment(
             listOf(
                 Tag(userKey, "bamboo-agent"),
                 Tag(bambooBuildKey, bambooResultKey)
+            )
+        }
+    }
+
+    /**
+     * Describes an investment:
+     * - value proposition
+     * - cost factors
+     * - accountability tracking
+     *
+     * @param useCase the value proposition for the investment
+     * @param lifespan pessimistic estimate of the duration of the investment, higher values mean higher cost
+     */
+    class Builder(
+        private val useCase: String,
+        private val lifespan: Duration
+    ) {
+        private var disposable: Boolean = true
+        private var reuseKey: () -> String = { "jpt-${UUID.randomUUID()}" }
+
+        /**
+         * @param disposable if true, then the investment can be cancelled even before [lifespan] and get its cost reduced
+         */
+        fun disposable(disposable: Boolean) = apply { this.disposable = disposable }
+        /**
+         * @param reuseKey if a new investment would have the same reuse key as an existing investment, the old one can be
+         *                 reused, reducing the cost
+         */
+        fun reuseKey(reuseKey: () -> String) = apply { this.reuseKey = reuseKey }
+
+        fun build(): Investment {
+            return Investment(
+                useCase = useCase,
+                lifespan = lifespan,
+                disposable = disposable,
+                reuseKey = reuseKey
             )
         }
     }

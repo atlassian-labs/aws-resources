@@ -111,12 +111,13 @@ class Aws private constructor(
 
     private val shortTermStorage: ProvisionedStack by lazy {
         StackFormula(
-            investment = Investment(
+            investment = Investment.Builder(
                 useCase = "Transport files necessary to run the tests",
-                reuseKey = { "jpt-short-term-storage" },
-                lifespan = Duration.ofDays(30),
-                disposable = false
-            ),
+                lifespan = Duration.ofDays(30)
+            )
+            .disposable(false)
+            .reuseKey { "jpt-short-term-storage" }
+            .build(),
             cloudformationTemplate = readResourceText("aws/short-term-storage.yaml"),
             parameters = listOf(
                 Parameter().withParameterKey("PermissionBoundaryPolicyARN")
@@ -130,12 +131,13 @@ class Aws private constructor(
 
     private val customDatasetStorage: ProvisionedStack by lazy {
         StackFormula(
-            investment = Investment(
+            investment = Investment.Builder(
                 useCase = "Store custom datasets",
-                reuseKey = { "jpt-custom-datasets-storage" },
-                lifespan = Duration.ofDays(800),
-                disposable = false
-            ),
+                lifespan = Duration.ofDays(800)
+            )
+            .disposable(false)
+            .reuseKey { "jpt-custom-datasets-storage" }
+            .build(),
             cloudformationTemplate = readResourceText("aws/custom-datasets-storage.yaml"),
             aws = this
         ).provision()

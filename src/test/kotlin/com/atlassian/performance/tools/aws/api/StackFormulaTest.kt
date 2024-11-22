@@ -21,10 +21,10 @@ class StackFormulaTest {
     @Timeout(5, unit = SECONDS)
     fun shouldNotHang() {
         val formula = StackFormula(
-            investment = Investment(
+            investment = Investment.Builder(
                 useCase = "Unit test the StackFormula",
-                lifespan = Duration.ofMinutes(1)
-            ),
+                lifespan = Duration.ofMinutes(1))
+                .build(),
             aws = FakeAws.awsForUnitTests(
                 batchingCloudformationRefreshPeriod = Duration.ofMillis(100),
                 credentialsProvider = MissingCredentialsProvider()

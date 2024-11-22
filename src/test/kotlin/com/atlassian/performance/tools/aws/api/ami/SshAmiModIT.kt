@@ -39,7 +39,7 @@ class SshAmiModIT {
         val newImageId = sshAmiMod.provideAmiId(aws)
 
         // then
-        val investment = Investment(echo.useCase, Duration.ofMinutes(10))
+        val investment = Investment.Builder(echo.useCase, Duration.ofMinutes(10)).build()
         val prefix = investment.reuseKey()
         val sshKey = SshKeyFormula(aws.ec2, createTempDirectory(prefix), prefix, investment.lifespan).provision()
         aws.awaitingEc2.allocateInstance(investment, sshKey, vpcId = null) { launch ->
