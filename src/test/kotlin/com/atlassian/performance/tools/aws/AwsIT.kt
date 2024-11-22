@@ -20,11 +20,12 @@ import java.util.*
 
 class AwsIT {
 
-    private val investment = Investment(
+    private val investment = Investment.Builder(
         useCase = "Test aws-resources library",
-        lifespan = Duration.ofMinutes(5),
-        disposable = true
+        lifespan = Duration.ofMinutes(5)
     )
+    .disposable(true)
+    .build()
     private val workspace = Files.createTempDirectory("AwsIT-")
     private val awsPrefix = "aws-resources-test-"
 
