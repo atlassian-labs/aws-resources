@@ -23,6 +23,9 @@ Dropping a requirement of a major version of a dependency is a new contract.
 ## [Unreleased]
 [Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.18.0...master
 
+### Fixed
+- Fix binary incompatibility of `Investment.copy` with the previous minor version.
+
 ## [1.18.0] - 2024-11-29
 [1.18.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.17.0...release-1.18.0
 
