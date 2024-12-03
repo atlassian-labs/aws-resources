@@ -21,7 +21,10 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.17.0...master
+[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.18.0...master
+
+## [1.18.0] - 2024-11-29
+[1.18.0]: https://github.com/atlassian-labs/aws-resources/compare/release-1.17.0...release-1.18.0
 
 ### Added
 - Add `Investment.Builder`
