@@ -51,6 +51,24 @@ private constructor(
     fun tag(): List<Tag> = tagAtlassianAwsAccountability() + tagLifecycle() + tagInitiator()
 
     /**
+     * Added for backwards compatibility.
+     * TODO: To be removed in the next major version.
+     */
+    fun copy(
+        useCase: String = this.useCase,
+        lifespan: Duration = this.lifespan,
+        disposable: Boolean = this.disposable,
+        reuseKey: () -> String = this.reuseKey
+    ): Investment {
+        return Investment(
+            useCase = useCase,
+            lifespan = lifespan,
+            disposable = disposable,
+            reuseKey = reuseKey
+        )
+    }
+
+    /**
      * @return tags required by all Atlassian AWS accounts
      */
     private fun tagAtlassianAwsAccountability(): List<Tag> = listOf(
