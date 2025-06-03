@@ -21,6 +21,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      # This step is a workaround to avoid a decryption issue caused by mark-vieira/gradle-maven-settings-plugin
+      # See https://github.com/mark-vieira/gradle-maven-settings-plugin/issues/15 for details
+      - name: Remove default github maven configuration
+        run: rm ~/.m2/settings.xml
       - name: Auth AWS
         uses: aws-actions/configure-aws-credentials@v1
         with:
