@@ -32,7 +32,7 @@ class CanonicalAmiProvider private constructor(
     }
 
     class Builder {
-        private val focal = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250508.1"
+        private val focal = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250603"
         private var imageName = focal
 
         /**

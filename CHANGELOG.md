@@ -21,7 +21,14 @@ Adding a requirement of a major version of a dependency is breaking a contract.
 Dropping a requirement of a major version of a dependency is a new contract.
 
 ## [Unreleased]
-[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.18.3...master
+[Unreleased]: https://github.com/atlassian-labs/aws-resources/compare/release-1.18.4...master
+
+## [1.18.4] - 2025-06-16
+[1.18.4]: https://github.com/atlassian-labs/aws-resources/compare/release-1.18.3...release-1.18.4
+
+### Fixed
+- Bump Ubuntu Focal AMI to `ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250603`.
+  The previous one was not that old, but still disappeared: `ubuntu-focal-20.04-amd64-server-20250508.1`.
 
 ## [1.18.3] - 2025-06-04
 [1.18.3]: https://github.com/atlassian-labs/aws-resources/compare/release-1.18.2...release-1.18.3
